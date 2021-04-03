@@ -42,6 +42,8 @@ public class Game {
 		screen.add(block6);
 		Block block7 = new Block(500, 150, "2", "ground");
 		screen.add(block7);
+		Block block8 = new Block(500, 300, "2", "ground");
+		screen.add(block8);
 		
 		Player player = new Player(50, 50, "Player", "idle", "img/player/idle.gif", 1);
 		screen.add(player);
