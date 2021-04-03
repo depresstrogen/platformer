@@ -1,2 +1,2 @@
-# platformer
+# Platformer
 Platform game in Java
