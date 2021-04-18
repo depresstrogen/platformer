@@ -8,87 +8,86 @@ public class Game {
 	public Screen screen;
 	public KeebHandler keeb;
 	public MouseHandler mouse;
-	public int playerX = 0;
+	public int playerX = 200;
 	public int playerY = 0;
-	public int velocity = 0;
 	
+	public int playerSX = 0;
+	public int playerSY = 0;
+	
+	public int velocity = 0;
 	public boolean inJump = false;
+	private boolean paint = false;
+	private int scroll = 0;
+	private int moveSpeed = 10;
+	
 	public Game(Screen screen, KeebHandler keeb, MouseHandler mouse) {
 		this.screen = screen;
 		this.keeb = keeb;
+		this.mouse = mouse;
 	}
 
 	public void start() {
 		int fps = 60;
 		long nextFrame = System.currentTimeMillis() + (1000 / fps);
 
-		for (int i = 0; i < 8; i++) {
-			Block block = new Block(i * 32, 200, "2", "ground");
+		for (int i = 0; i < 8*32; i++) {
+			Block block = new Block(i, 200, "2", "ground");
 			screen.add(block);
 			System.out.print("added");
 		}
-
-		Block block1 = new Block(320, 200, "2", "ground");
-		screen.add(block1);
-		Block block2 = new Block(256, 350, "2", "ground");
-		screen.add(block2);
-		Block block3 = new Block(560, 350, "2", "ground");
-		screen.add(block3);
-		Block block4 = new Block(460, 400, "2", "ground");
-		screen.add(block4);
-		Block block5 = new Block(692, 270, "2", "ground");
-		screen.add(block5);
-		Block block6 = new Block(660, 170, "2", "ground");
-		screen.add(block6);
-		Block block7 = new Block(500, 150, "2", "ground");
-		screen.add(block7);
-		Block block8 = new Block(500, 300, "2", "ground");
-		screen.add(block8);
 		
 		Player player = new Player(50, 50, "Player", "idle", "img/player/idle.gif", 1);
 		screen.add(player);
-
+		
 		while (true) {
-			int moveSpeed = 5;
+			
 			if (keeb.getKey('A')) {
 				playerX -= moveSpeed;
 			}
-
 			if (keeb.getKey((int) 'D')) {
-				playerX += moveSpeed;
+				playerX += moveSpeed; 
 			}
-
 			if (keeb.getKey('W')) {
 				playerY--;
 			}
-
 			if (keeb.getKey('S')) {
 				playerY++;
 			}
-			
 			if(keeb.getKey(0) && !inJump) {
 				jump();
 				inJump = true;
 			}
-
-			player.setX(playerX);
-			player.setY(playerY);
-			screen.remove(screen.getIndex("Player"));
-			screen.add(player);
-
+			if(keeb.getKey(1)) {
+				paint = true;
+			} else {
+				paint = false;
+			}
 			
+			gravity();
 			collisionCheck();
+			scrollCheck();
 			
-			player.setX(playerX);
-			player.setY(playerY);
-			screen.remove(screen.getIndex("Player"));
-			screen.add(player);
 
 			while (nextFrame > System.currentTimeMillis()) {
-
 			}
-
+			
+			player.setX(playerX);
+			player.setY(playerY);
+			screen.remove(screen.getIndex("Player"));
+			screen.add(player);
 			nextFrame = System.currentTimeMillis() + (1000 / fps);
+			
+			if (mouse.isMousePressed()) {
+				Block block = new Block(
+						(int)((mouse.getX() - 8) / screen.getXRatio() + scroll),
+						(int)((mouse.getY() - 32) / screen.getYRatio()),
+						"MouseAdded", "ground");
+				screen.add(block);
+				System.out.print("added");
+				if(!paint) {
+					mouse.removePressedFlag();
+				}
+			}
 		}
 
 	}
@@ -108,45 +107,59 @@ public class Game {
 	}
 	
 	public void collisionCheck() {
+		final int CHAR_WIDTH = 32;
+		
 		ArrayList<ScreenElement> blocks = screen.getAllOfType("block");
-
-		boolean doGrav = true;
+		
 		for (int i = 0; i < blocks.size(); i++) {
 			Block block = (Block) blocks.get(i);
-			if (block.getY() - 32 < playerY && block.getY() + 32 > playerY && block.getX() - 32 < playerX
-					&& block.getX() + 32 > playerX) {
+			if (block.getY() - CHAR_WIDTH < playerY && block.getY() + CHAR_WIDTH > playerY && block.getX() - CHAR_WIDTH < playerX
+					&& block.getX() + CHAR_WIDTH > playerX) {
 				
 				//Top
-				if (block.getY() - 32 < playerY && block.getY() - 16 > playerY) {
-					playerY = block.getY() - 31;
-					doGrav = false;
+				if (block.getY() - CHAR_WIDTH < playerY && block.getY() - (CHAR_WIDTH / 2) > playerY) {
+					playerY = block.getY() - (CHAR_WIDTH - 1);
 					velocity = 0;
 					inJump = false;
 				}
 				//bottom
-				if (block.getY() + 32 > playerY && block.getY() + 16 < playerY) {
-					playerY = block.getY() + 32;
+				else if (block.getY() + CHAR_WIDTH > playerY && block.getY() + (CHAR_WIDTH / 2) < playerY) {
+					playerY = block.getY() + CHAR_WIDTH;
+					velocity = 0;
 				}
 				//left
-				if (block.getX() - 32 < playerX && block.getX() - 16 > playerX) {
-					if(doGrav) {
-						playerX = block.getX() - 32;
-					}
+				else if (block.getX() - CHAR_WIDTH < playerX && block.getX() - (CHAR_WIDTH / 2) > playerX) {
+					
+						playerX = block.getX() - CHAR_WIDTH;
+					
 				}
 				//right
-				if (block.getX() + 32 > playerX && block.getX() + 16 < playerX) {
-					if (doGrav) {
-						playerX = block.getX() + 32;
-					}
+				else if (block.getX() + CHAR_WIDTH > playerX && block.getX() + (CHAR_WIDTH / 2) < playerX) {
+					
+						playerX = block.getX() + CHAR_WIDTH;
+					
 				}
 			}
-		}
-		
-		if(doGrav) {
-			gravity();
 		}
 
 	}
 
+	public void scrollCheck() {
+		playerSX = (playerX - scroll);
+		
+		if(playerSX < 200) {
+			scroll -= moveSpeed;
+		}
+		
+		if(playerSX > 1000) {
+			scroll += moveSpeed;
+		}
+		
+		System.out.println(scroll);
+	}
+	
+	public int getScroll() {
+		return scroll;
+	}
 	// Medal System
 }

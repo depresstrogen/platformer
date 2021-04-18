@@ -32,6 +32,9 @@ public class KeebHandler {
 				if (e.getKeyCode() == KeyEvent.VK_SPACE) {
 					keyboard[0] = true;
 				}
+				if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
+					keyboard[1] = true;
+				}
 			}
 
 			public void keyReleased(KeyEvent e) {
@@ -49,6 +52,9 @@ public class KeebHandler {
 				}
 				if (e.getKeyCode() == KeyEvent.VK_SPACE) {
 					keyboard[0] = false;
+				}
+				if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
+					keyboard[1] = false;
 				}
 			}
 		});

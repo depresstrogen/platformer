@@ -35,10 +35,14 @@ public class Screen extends JPanel {
 
 	private int windowX;
 	private int windowY;
-	private final int BASEX = 1280;
+	private  final int BASEX = 1280;
 	private final int BASEY = 720;
 	private double ratioX = 1;
 	private double ratioY = 1;
+	
+	public Game game;
+	
+	private int num = 0;
 
 	/**
 	 * Constructs the jFrame, mouse listener and key listener
@@ -70,7 +74,7 @@ public class Screen extends JPanel {
 		BufferedImage playerPic;
 
 		int i = 0;
-		Game game = new Game(this, keeb, mouse);
+		game = new Game(this, keeb, mouse);
 		
 		Thread gameThread = new Thread() {
 			
@@ -88,15 +92,15 @@ public class Screen extends JPanel {
 			ratioX = (double) windowX / BASEX;
 			ratioY = (double) windowY / BASEY;
 
-			System.out.println(windowX + " " + windowY);
-
-			System.out.println(ratioX + " " + ratioY);
-
+			//System.out.println(windowX + " " + windowY);
+			//System.out.println(ratioX + " " + ratioY);
+			System.out.print("");
 			i++;
 			while (nextFrame > System.currentTimeMillis()) {
 
 			}
-
+			//System.out.println("FPS = " + num*60);
+			num = 0;
 //			System.out.print("Frame " + i + " ");
 //			keeb.inputPrint();
 //			System.out.println();
@@ -120,24 +124,30 @@ public class Screen extends JPanel {
 		// Loops through each item in the ArrayList and paints it depending which object
 
 		for (int i = 0; i < elements.size(); i++) {
+			int scroll = game.getScroll();
 			ScreenElement element = elements.get(i);
 
 			if (element instanceof Player) {
 				Player player = (Player) element;
 				Image image = Toolkit.getDefaultToolkit().getImage(player.getImage());
-				g2d.drawImage(image, (int) (player.getX() * ratioX), (int) (player.getY() * ratioY),
+				g2d.drawImage(image,
+						(int) ((player.getX() - scroll )* ratioX),
+						(int) (player.getY() * ratioY),
 						(int) (image.getHeight(this) * ratioX * player.getScale()),
 						(int) (image.getWidth(this) * ratioY * player.getScale()), null);
 			}
 			if (element instanceof Block) {
 				Block block = (Block) element;
 				Image image = Toolkit.getDefaultToolkit().getImage(block.getImage());
-				g2d.drawImage(image, (int) (block.getX() * ratioX), (int) (block.getY() * ratioY),
+				g2d.drawImage(image,
+						(int) ((block.getX() - scroll) * ratioX),
+						(int) (block.getY() * ratioY),
 						(int) (image.getHeight(this) * ratioX),
 						(int) (image.getWidth(this) * ratioY), null);
 			}
 		}
-		repaint();
+		num++;
+		
 	}// paint
 
 	/**
@@ -317,6 +327,18 @@ public class Screen extends JPanel {
 	
 	public JFrame getFrame() {
 		return frame;
+	}
+	
+	public MouseListener getMouseListener() {
+		return mouse;
+	}
+	
+	public double getXRatio()  {
+		return ratioX;
+	}
+	
+	public double getYRatio()  {
+		return ratioY;
 	}
 	
 //	/**
