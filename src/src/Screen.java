@@ -18,31 +18,37 @@ import javax.swing.*;
  *
  */
 public class Screen extends JPanel {
+	// The JFrame to draw on
 	private JFrame frame;
+
+	// Everything to be displayed on screen is stored here
 	private ArrayList<ScreenElement> elements = new ArrayList<ScreenElement>();
-	private boolean[] keyboard = new boolean[255];
-	private MouseHandler mouse = new MouseHandler();
-	// The id of the ScreenElement that was last clicked
-	private String lastClick = "";
-	// A copy of the ScreenElement that was last clicked
-	private Object lastClickObject;
-	// Used so that unless a new click is made the clicking methods are not executed
-	private boolean newClick = false;
+
 	// Starts the game but doesn't display it until the start method is called
 	private Color backgroundColor = Color.WHITE;
-	private int lastMouseX = 0;
-	private int lastMouseY = 0;
 
+	// The game runs at 720p then scales
+	private final int BASEX = 1280;
+	private final int BASEY = 720;
+
+	// The size of the window
 	private int windowX;
 	private int windowY;
-	private  final int BASEX = 1280;
-	private final int BASEY = 720;
+
+	// The ratio of the window to 720p
 	private double ratioX = 1;
 	private double ratioY = 1;
-	
+
+	// The game object
 	public Game game;
-	
-	private int num = 0;
+
+	// IO objects
+	private MouseHandler mouse = new MouseHandler();
+	private KeebHandler keeb = new KeebHandler();
+
+	// Time management (Literally)
+	private int fps = 60;
+	private long nextFrame = System.currentTimeMillis() + (1000 / fps);
 
 	/**
 	 * Constructs the jFrame, mouse listener and key listener
@@ -51,78 +57,54 @@ public class Screen extends JPanel {
 	 * @param width  How many pixels wide the window will be
 	 */
 	public Screen(int height, int width) {
+		// Deal with parameters
 		windowX = width;
 		windowY = height;
-		int fps = 60;
-		long nextFrame = System.currentTimeMillis() + (1000 / fps);
+
 		// Start JFrame
-		frame = new JFrame("Platformer | By Riley Power");
-		frame.add(this);
-		frame.setSize(height, width);
-		frame.setVisible(true);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frameSetup();
+		runGame();
 
-		// Keyboard Inputs
-		// Would be in another method but it leeches off JFrame lol
-		KeebHandler keeb = new KeebHandler();
-		keeb.startKeyListener(frame);
-		// addMouseListener(this);
-
-		MouseHandler mouse = new MouseHandler();
-		mouse.start(frame);
-
-		BufferedImage playerPic;
-
-		int i = 0;
-		game = new Game(this, keeb, mouse);
-		
-		Thread gameThread = new Thread() {
-			
-			public void run() {
-				game.start();
-			}
-			
-		};
-		
-		gameThread.start();
+		// lol while true go brrr
 		while (true) {
-			windowX = frame.getWidth();
-			windowY = frame.getHeight();
+			ratio();
+			repaint();
 
-			ratioX = (double) windowX / BASEX;
-			ratioY = (double) windowY / BASEY;
-
-			//System.out.println(windowX + " " + windowY);
-			//System.out.println(ratioX + " " + ratioY);
-			System.out.print("");
-			i++;
 			while (nextFrame > System.currentTimeMillis()) {
-
+				// Wait for next frame time
 			}
-			//System.out.println("FPS = " + num*60);
-			num = 0;
-//			System.out.print("Frame " + i + " ");
-//			keeb.inputPrint();
-//			System.out.println();
-//			
 			nextFrame = System.currentTimeMillis() + (1000 / fps);
 		}
 
 	}// Screen
 
 	/**
+	 * Constructs the JFrame, all other required objects
+	 */
+	private void frameSetup() {
+		frame = new JFrame("Platformer | By Riley Power");
+		frame.add(this);
+		frame.setSize(windowX, windowY);
+		frame.setVisible(true);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		keeb.startKeyListener(frame);
+		mouse.start(frame);
+		game = new Game(this, keeb, mouse);
+	}// frameSetup
+
+	/**
+	 * Lmao JFrame buttons look like shit let me just re make an existing code base
+	 * Displays everything in the elements ArrayList according to it's parameters
+	 * 
 	 * @param g The canvas to paint every object to
 	 */
 	public void paint(Graphics g) {
 		// Main Paint Loop
 		super.paint(g);
 		Graphics2D g2d = (Graphics2D) g;
-		g2d.setBackground(backgroundColor);
-
-		g2d.setColor(Color.RED);
 
 		// Loops through each item in the ArrayList and paints it depending which object
-
+		// type it is
 		for (int i = 0; i < elements.size(); i++) {
 			int scroll = game.getScroll();
 			ScreenElement element = elements.get(i);
@@ -130,25 +112,34 @@ public class Screen extends JPanel {
 			if (element instanceof Player) {
 				Player player = (Player) element;
 				Image image = Toolkit.getDefaultToolkit().getImage(player.getImage());
-				g2d.drawImage(image,
-						(int) ((player.getX() - scroll )* ratioX),
-						(int) (player.getY() * ratioY),
+				g2d.drawImage(image, (int) ((player.getX() - scroll) * ratioX), (int) (player.getY() * ratioY),
 						(int) (image.getHeight(this) * ratioX * player.getScale()),
 						(int) (image.getWidth(this) * ratioY * player.getScale()), null);
 			}
+
 			if (element instanceof Block) {
 				Block block = (Block) element;
 				Image image = Toolkit.getDefaultToolkit().getImage(block.getImage());
-				g2d.drawImage(image,
-						(int) ((block.getX() - scroll) * ratioX),
-						(int) (block.getY() * ratioY),
-						(int) (image.getHeight(this) * ratioX),
-						(int) (image.getWidth(this) * ratioY), null);
+				g2d.drawImage(image, (int) ((block.getX() - scroll) * ratioX), (int) (block.getY() * ratioY),
+						(int) (image.getHeight(this) * ratioX), (int) (image.getWidth(this) * ratioY), null);
 			}
 		}
-		num++;
-		
+
 	}// paint
+
+	/**
+	 * Gets the ratio one must multiply the current window dimensions to scale to
+	 * 720p
+	 */
+	public void ratio() {
+		windowX = frame.getWidth();
+		windowY = frame.getHeight();
+
+		ratioX = (double) windowX / BASEX;
+		ratioY = (double) windowY / BASEY;
+
+		repaint();
+	}// ratio
 
 	/**
 	 * Adds the ScreenElement to the elements ArrayList
@@ -166,25 +157,40 @@ public class Screen extends JPanel {
 	 * 
 	 * @param se    The ScreenElement to be inserted
 	 * @param index The index to replace with the new ScreenElement
-	 * @see whatClicked
 	 */
 	public void replace(ScreenElement se, int index) {
 		elements.set(index, se);
 		repaint();
 	}// replace
 
+	/**
+	 * Removes the ScreenElement in the elements ArrayList of the index provided
+	 * 
+	 * @param index The index to remove
+	 */
 	public void remove(int index) {
 		elements.remove(index);
-	}
-	
+	}// remove
+
+	/**
+	 * Removes the ScreenElement in the elements ArrayList of the id provided
+	 * 
+	 * @param id The index to remove
+	 */
 	public void removeID(String id) {
 		elements.remove(getIndex(id));
-	}
-	
+	}// removeID
+
+	/**
+	 * Returns an ArrayList containing every instance of a certain object type
+	 * 
+	 * @param type The object type to search for
+	 * @return The ArrayList containing every instance of the desired type
+	 */
 	public ArrayList<ScreenElement> getAllOfType(String type) {
 		ArrayList<ScreenElement> typeArr = new ArrayList<ScreenElement>();
-		
-		for(int i = 0; i < elements.size(); i++) {
+
+		for (int i = 0; i < elements.size(); i++) {
 			if (elements.get(i) instanceof Block) {
 				if (type.equals("block")) {
 					typeArr.add(elements.get(i));
@@ -192,63 +198,21 @@ public class Screen extends JPanel {
 			}
 		}
 		return typeArr;
-	}
-	
-//	/**
-//	 * Gets the x and y of the mouse then calls whatClicked
-//	 * 
-//	 * @param e The event which triggers this method
-//	 * 
-//	 */
-//	public void mouseReleased(MouseEvent e) {
-//		int mouseX = e.getX();
-//		int mouseY = e.getY();
-//		whatClicked(mouseX, mouseY);
-//	}// mouseReleased
-//
-//	/**
-//	 * Loops through every element in the array and if the mouseX and mouseY are
-//	 * inside the ScreenElement it registers a click and sends it to the
-//	 * MouseHandler
-//	 * 
-//	 * @param mouseX the x coordinate you would like to check for a clickable object
-//	 * @param mouseY the y coordinate you would like to check for a clickable object
-//	 * @see MouseHandler
-//	 */
-//	private void whatClicked(int mouseX, int mouseY) {
-//		System.out.println(mouseX + " " + mouseY);
-//		lastMouseX = mouseX;
-//		lastMouseY = mouseY;
-//		for (int i = 0; i < elements.size(); i++) {
-//			
-//		}
-//	}// whatClicked
+	}// getAllOfType
 
-//	/**
-//	 * Gets the id of the last clicked ScreenElement, and sets newClick to false
-//	 * 
-//	 * @return The id of the last clicked ScreenElement
-//	 */
-//	public String getLastClick() {
-//		newClick = false;
-//		return lastClick;
-//	}// getLastClick
-//
-//	/**
-//	 * 
-//	 * @return A copy of the object which was last clicked
-//	 */
-//	public Object getLastClickObject() {
-//		return lastClickObject;
-//	}// getLastClickObject
-//
-//	/**
-//	 * 
-//	 * @return if the most recent click was "real" or not
-//	 */
-//	public boolean isNewClick() {
-//		return newClick;
-//	}// isNewClick
+	/**
+	 * Removes all ScreenElements in the elements ArrayList of the id provided
+	 * 
+	 * @param id The index to remove
+	 */
+	public void removeAllID(String id) {
+		for (int i = 0; i < elements.size(); i++) {
+			if (elements.get(i).getID().equals(id)) {
+				elements.remove(i);
+				i--;
+			}
+		}
+	}// removeAllID
 
 	/**
 	 * Gets the index in the ArrayList elements of whatever id is given
@@ -315,47 +279,41 @@ public class Screen extends JPanel {
 	}// setBackgroundColor
 
 	/**
-	 * Accessor Method for keyboard[][]
+	 * Returns the frame object
 	 * 
-	 * @return An array of each possible letter, and if it is currently pressed or
-	 *         not
+	 * @return The frame object
 	 */
-	public boolean[] getKeyboard() {
-		return keyboard;
-	}// getKeyboard
-
-	
 	public JFrame getFrame() {
 		return frame;
-	}
-	
-	public MouseListener getMouseListener() {
-		return mouse;
-	}
-	
-	public double getXRatio()  {
+	}// getFrame
+
+	/**
+	 * Returns the ratio one must multiply the current windowX to scale to 720p
+	 * 
+	 * @return The X ratio
+	 */
+	public double getXRatio() {
 		return ratioX;
-	}
-	
-	public double getYRatio()  {
+	}// getXRatio
+
+	/**
+	 * Returns the ratio one must multiply the current windowY to scale to 720p
+	 * 
+	 * @return The Y ratio
+	 */
+	public double getYRatio() {
 		return ratioY;
-	}
-	
-//	/**
-//	 * Accessor Method for lasyMouseX
-//	 * 
-//	 * @return the mouseX of the last click
-//	 */
-//	public int getLastMouseX() {
-//		return lastMouseX;
-//	}// getLastMouseX
-//
-//	/**
-//	 * Accessor Method for lasyMouseY
-//	 * 
-//	 * @return the mouseY of the last click
-//	 */
-//	public int getLastMouseY() {
-//		return lastMouseY;
-//	}// getLastMouseY
+	}// getYRatio
+
+	/**
+	 * Starts a new thread and makes the game start
+	 */
+	public void runGame() {
+		Thread gameThread = new Thread() {
+			public void run() {
+				game.start();
+			}
+		};
+		gameThread.start();
+	}// runGame
 }// Screen
