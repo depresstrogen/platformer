@@ -4,6 +4,13 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import javax.swing.JFrame;
 
+/**
+ * Handles all keyboard inputs (More a KeebListener but who the fuck is keeping
+ * track? no one thats what i thought)
+ * 
+ * @author Riley Power
+ * @version April 19 2021
+ */
 public class KeebHandler {
 
 	// Stores the state of each key

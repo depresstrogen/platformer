@@ -10,10 +10,10 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 
 /**
- * Everything to do with drawing the screen, getting mouse movement, and
- * anything to do with the main window is performed in this class
+ * Everything to do with drawing the screen, and anything to do with the main
+ * window is performed in this class
  * 
- * @version January 24, 2021
+ * @version April 19, 2021
  * @author Riley Power
  *
  */
@@ -23,9 +23,6 @@ public class Screen extends JPanel {
 
 	// Everything to be displayed on screen is stored here
 	private ArrayList<ScreenElement> elements = new ArrayList<ScreenElement>();
-
-	// Starts the game but doesn't display it until the start method is called
-	private Color backgroundColor = Color.WHITE;
 
 	// The game runs at 720p then scales
 	private final int BASEX = 1280;
@@ -267,16 +264,6 @@ public class Screen extends JPanel {
 	public void clearScreen() {
 		elements.clear();
 	}// clearScreen
-
-	/**
-	 * Sets the background color of the window
-	 * 
-	 * @param color The color to set the background to
-	 */
-	public void setBackgroundColor(Color color) {
-		backgroundColor = color;
-		repaint();
-	}// setBackgroundColor
 
 	/**
 	 * Returns the frame object

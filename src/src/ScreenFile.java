@@ -6,7 +6,7 @@ import java.util.ArrayList;
  * The file class, reads and writes an ArrayList using an a ObjectStream, which
  * saves every byte of the ArrayList as it is in RAM
  * 
- * @version January 14, 2021
+ * @version April 19, 2021
  * @author Riley Power
  */
 

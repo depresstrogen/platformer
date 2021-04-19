@@ -4,7 +4,7 @@ import java.io.Serializable;
 /**
  * The superclass of every ScreenElement
  * 
- * @version January 14 2021
+ * @version April 19 2021
  * @author Riley Power
  *
  */
@@ -59,7 +59,6 @@ public class ScreenElement implements Serializable {
 	 * 
 	 * @param x The value to set the element's x to
 	 */
-
 	public void setX(int x) {
 		this.x = x;
 	}// setX
