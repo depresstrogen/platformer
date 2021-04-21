@@ -99,11 +99,10 @@ public class Screen extends JPanel {
 		// Main Paint Loop
 		super.paint(g);
 		Graphics2D g2d = (Graphics2D) g;
-
+		int scroll = game.getScroll();
 		// Loops through each item in the ArrayList and paints it depending which object
 		// type it is
 		for (int i = 0; i < elements.size(); i++) {
-			int scroll = game.getScroll();
 			ScreenElement element = elements.get(i);
 
 			if (element instanceof Player) {
@@ -122,6 +121,15 @@ public class Screen extends JPanel {
 			}
 		}
 
+		if(game.getFlag("grid")) {
+			
+			for (double i = 0; i < 720 * ratioY; i += 32 * ratioY) {
+				g2d.drawLine(0, (int) i, (int) (1280 * ratioY), (int) i);
+			}
+			for (double i = -1; i < 1280 * ratioX; i += 32 * ratioX) {
+				g2d.drawLine((int) (i - (scroll % 32) * ratioX), 0, (int) (i - (scroll % 32) * ratioX), (int) (720 * ratioX));
+			}
+		}
 	}// paint
 
 	/**

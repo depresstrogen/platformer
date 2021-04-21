@@ -3,8 +3,11 @@ package src;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 /**
  * Gets the state of the mouse and returns it to whatever needs the input
@@ -12,7 +15,7 @@ import javax.swing.JPanel;
  * @author Riley Power
  * @version April 19 2021
  */
-public class MouseHandler extends JPanel implements MouseListener {
+public class MouseHandler extends JPanel implements MouseListener, MouseWheelListener {
 
 	// Mouse coordinates
 	private double mouseX = 0;
@@ -21,8 +24,12 @@ public class MouseHandler extends JPanel implements MouseListener {
 	// Mouse button flag
 	private boolean isMousePressed = false;
 
+	private char mouseButton = ' ';
 	// Screen object
 	private Frame frame;
+
+	private char mouseWheel = ' ';
+	private long mouseWheelTime = 0;
 
 	/**
 	 * Starts the mouse handler (listener) using the provided JFrame as the screen
@@ -32,6 +39,8 @@ public class MouseHandler extends JPanel implements MouseListener {
 	public void start(Frame frame) {
 		this.frame = frame;
 		frame.addMouseListener(this);
+		frame.addMouseWheelListener(this);
+
 	}// start
 
 	/**
@@ -41,6 +50,7 @@ public class MouseHandler extends JPanel implements MouseListener {
 	 * @param e The mouse event that triggers the method
 	 */
 	public void mousePressed(MouseEvent e) {
+		mouseButton = determineMouseButton(e);
 		mouseX = e.getX();
 		mouseY = e.getY();
 		isMousePressed = true;
@@ -53,6 +63,7 @@ public class MouseHandler extends JPanel implements MouseListener {
 	 * @param e The mouse event that triggers the method
 	 */
 	public void mouseReleased(MouseEvent e) {
+		mouseButton = determineMouseButton(e);
 		mouseX = e.getX();
 		mouseY = e.getY();
 		isMousePressed = false;
@@ -104,6 +115,44 @@ public class MouseHandler extends JPanel implements MouseListener {
 		return (int) mouseY;
 	}// getY
 
+	private char determineMouseButton(MouseEvent e) {
+		char mb = 'L';
+		if (SwingUtilities.isLeftMouseButton(e)) {
+			mb = 'L';
+		} else if (SwingUtilities.isMiddleMouseButton(e)) {
+			mb = 'M';
+		} else if (SwingUtilities.isRightMouseButton(e)) {
+			mb = 'R';
+		}
+		return mb;
+
+	}
+
+	public char getMouseButton() {
+		return mouseButton;
+	}
+
+	public void mouseWheelMoved(MouseWheelEvent e) {
+		System.out.println("m");
+
+		if (e.getWheelRotation() < 0) {
+			mouseWheel = 'U';
+			System.out.println("mouse wheel Up");
+		} else {
+			mouseWheel = 'D';
+			System.out.println("mouse wheel Down");
+		}
+		mouseWheelTime = System.currentTimeMillis();
+	}
+
+	public char getMouseWheel() {
+		return mouseWheel;
+	}
+	
+	public long getMouseWheelTime() {
+		return mouseWheelTime;
+	}
+	
 	/**
 	 * Unused but would activate when the mouse is clicked in any way
 	 */

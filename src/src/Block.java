@@ -19,9 +19,8 @@ public class Block extends ScreenElement {
 	 */
 	public Block(int x, int y, String id, String type) {
 		super(x, y, id);
-		if (type.equals("ground")) {
-			imageDir = "img/blocks/ground.png";
-		}
+		imageDir = "img/blocks/" + type + ".png";
+		
 	}// Block
 
 	/**

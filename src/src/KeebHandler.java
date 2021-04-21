@@ -53,6 +53,12 @@ public class KeebHandler {
 				if (e.getKeyCode() == KeyEvent.VK_Z) {
 					keyboard['Z'] = true;
 				}
+				if (e.getKeyCode() == KeyEvent.VK_G) {
+					keyboard['G'] = true;
+				}
+				if (e.getKeyCode() == KeyEvent.VK_L) {
+					keyboard['L'] = true;
+				}
 			}// keyPressed
 
 			/**
@@ -81,6 +87,12 @@ public class KeebHandler {
 				}
 				if (e.getKeyCode() == KeyEvent.VK_Z) {
 					keyboard['Z'] = false;
+				}
+				if (e.getKeyCode() == KeyEvent.VK_G) {
+					keyboard['G'] = false;
+				}
+				if (e.getKeyCode() == KeyEvent.VK_L) {
+					keyboard['L'] = false;
 				}
 			}// keyReleased
 		});
