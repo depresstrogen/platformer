@@ -42,6 +42,8 @@ public class Screen extends JPanel {
 	// IO objects
 	private MouseHandler mouse = new MouseHandler();
 	private KeebHandler keeb = new KeebHandler();
+	private ButtonActions actions;
+	private GUIElements gooey;
 
 	// Time management (Literally)
 	private int fps = 60;
@@ -61,7 +63,9 @@ public class Screen extends JPanel {
 		// Start JFrame
 		frameSetup();
 		runGame();
-
+		
+		
+		
 		// lol while true go brrr
 		while (true) {
 			ratio();
@@ -75,6 +79,8 @@ public class Screen extends JPanel {
 
 	}// Screen
 
+	
+	
 	/**
 	 * Constructs the JFrame, all other required objects
 	 */
@@ -84,9 +90,12 @@ public class Screen extends JPanel {
 		frame.setSize(windowX, windowY);
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		gooey = new GUIElements(this, frame);
+		game = new Game(this, keeb, mouse, gooey);
 		keeb.startKeyListener(frame);
-		mouse.start(frame);
-		game = new Game(this, keeb, mouse);
+		actions = new ButtonActions(this,frame,game);
+		mouse.start(frame, this, actions);
+		
 	}// frameSetup
 
 	/**
@@ -95,6 +104,9 @@ public class Screen extends JPanel {
 	 * 
 	 * @param g The canvas to paint every object to
 	 */
+	/**
+	 *
+	 */
 	public void paint(Graphics g) {
 		// Main Paint Loop
 		super.paint(g);
@@ -102,6 +114,16 @@ public class Screen extends JPanel {
 		int scroll = game.getScroll();
 		// Loops through each item in the ArrayList and paints it depending which object
 		// type it is
+		if(game.getFlag("grid")) {
+			g2d.setColor(Color.BLACK);
+			for (double i = 0; i < 720 * ratioY; i += 32 * ratioY) {
+				g2d.drawLine(0, (int) i, (int) (1280 * ratioY), (int) i);
+			}
+			for (double i = -1; i < 1280 * ratioX; i += 32 * ratioX) {
+				g2d.drawLine((int) (i - (scroll % 32) * ratioX), 0, (int) (i - (scroll % 32) * ratioX), (int) (720 * ratioX));
+			}
+		}
+		
 		for (int i = 0; i < elements.size(); i++) {
 			ScreenElement element = elements.get(i);
 
@@ -113,23 +135,38 @@ public class Screen extends JPanel {
 						(int) (image.getWidth(this) * ratioY * player.getScale()), null);
 			}
 
-			if (element instanceof Block) {
+			else if (element instanceof Block) {
 				Block block = (Block) element;
 				Image image = Toolkit.getDefaultToolkit().getImage(block.getImage());
 				g2d.drawImage(image, (int) ((block.getX() - scroll) * ratioX), (int) (block.getY() * ratioY),
 						(int) (image.getHeight(this) * ratioX), (int) (image.getWidth(this) * ratioY), null);
 			}
+			else if (element instanceof TextButton) {
+				TextButton button = (TextButton) element;
+				g2d.setColor(button.getColor());
+				g2d.fillRect((int) ((button.getX()) * ratioX), (int) (button.getY() * ratioY),
+						(int) (button.getHeight() * ratioX), (int) (button.getWidth() * ratioY));
+				int size = button.getWidth() / 2;
+				g2d.setColor(Color.black);
+				g2d.setFont(new Font(button.getFont(), Font.PLAIN, size));
+				g2d.drawString(button.getText(), button.getX() + 16, button.getY() + (int) ((button.getWidth() + (size / 2)) / 2));
+			}
+			else if (element instanceof Button) {
+				Button button = (Button) element;
+				g2d.setColor(button.getColor());
+				g2d.fillRect((int) ((button.getX()) * ratioX), (int) (button.getY() * ratioY),
+						(int) (button.getHeight() * ratioX), (int) (button.getWidth() * ratioY));
+			}
+			else if (elements.get(i) instanceof Text) {
+				Text text = (Text) elements.get(i);
+				g2d.setColor(text.getColor());
+				g2d.setFont(new Font(text.getFont(), Font.PLAIN, text.getFontSize()));
+				g2d.drawString(text.getText(), text.getX(), text.getY());
+			}
+			
 		}
 
-		if(game.getFlag("grid")) {
-			
-			for (double i = 0; i < 720 * ratioY; i += 32 * ratioY) {
-				g2d.drawLine(0, (int) i, (int) (1280 * ratioY), (int) i);
-			}
-			for (double i = -1; i < 1280 * ratioX; i += 32 * ratioX) {
-				g2d.drawLine((int) (i - (scroll % 32) * ratioX), 0, (int) (i - (scroll % 32) * ratioX), (int) (720 * ratioX));
-			}
-		}
+		
 	}// paint
 
 	/**
@@ -201,6 +238,12 @@ public class Screen extends JPanel {
 					typeArr.add(elements.get(i));
 				}
 			}
+			if (elements.get(i) instanceof Button) {
+				if (type.equals("button")) {
+					typeArr.add(elements.get(i));
+				}
+			}
+			
 		}
 		return typeArr;
 	}// getAllOfType
@@ -251,7 +294,7 @@ public class Screen extends JPanel {
 	 * 
 	 * @param file The directory to save the elements to
 	 */
-	public void saveElements(String file) {
+	public void saveElements(File file) {
 		ScreenFile io = new ScreenFile();
 		io.writeArrayList(elements, file);
 	}// saveElements
@@ -311,4 +354,8 @@ public class Screen extends JPanel {
 		};
 		gameThread.start();
 	}// runGame
+	
+	public GUIElements guiElements() {
+		return gooey;
+	}
 }// Screen

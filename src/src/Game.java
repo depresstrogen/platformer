@@ -1,5 +1,7 @@
 package src;
 
+import java.awt.Color;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -9,6 +11,9 @@ import javax.swing.JFrame;
  * Contains everything to do with the actual game such as - Player movement -
  * Gravity - Collision - Level Editor
  * 
+ * CONTROLS WASD = Movement SPACE = Jump G = Toggle Grid CTRL = Paint Brush CTRL
+ * + Z = Undo L = Save/Load T = Toggle GUI
+ * 
  * @author Riley Power
  * @version April 19 2021
  */
@@ -17,6 +22,7 @@ public class Game {
 	private Screen screen;
 	private KeebHandler keeb;
 	private MouseHandler mouse;
+	private GUIElements gooey;
 
 	// Player coordinates
 	private int playerX = 200;
@@ -28,13 +34,16 @@ public class Game {
 	// Player move speed
 	private int moveSpeed = 5;
 
+	private int jumpOffset = -16;
+
 	// Screen scroll
 	private int scroll = 0;
 
 	// For level editor, allows for CTRL Z
 	private int currentStroke = 0;
-	
+
 	// Flags
+	private boolean paused = false;
 	private boolean jumpAgain = false;
 	private boolean inJump = false;
 	private boolean paint = false;
@@ -43,6 +52,8 @@ public class Game {
 	private boolean gridToggle = false;
 	private boolean lastStrokeFlag = false;
 	private boolean onBlock = false;
+	private boolean tToggle = false;
+	
 	// Game timing
 	private int fps = 60;
 	private long nextFrame = System.currentTimeMillis() + (1000 / fps);
@@ -55,32 +66,39 @@ public class Game {
 	 * @param keeb   The keyboard to get input from
 	 * @param mouse  The mouse to get input from
 	 */
-	public Game(Screen screen, KeebHandler keeb, MouseHandler mouse) {
+	public Game(Screen screen, KeebHandler keeb, MouseHandler mouse, GUIElements gooey) {
 		this.screen = screen;
 		this.keeb = keeb;
 		this.mouse = mouse;
+		this.gooey = gooey;
 	}// Game
 
 	/**
 	 * Starts the game, Runs the main game loop
 	 */
-	public void start() {
+	synchronized void start() {
+		
+		for (int i = 0; i <= 8 * 32; i++) {
+			Block block = new Block(i, 256, "MouseAdded -1", "ground");
+			screen.add(block);
+		}
+
 		updatePlayer();
-		loadLevel();
 		while (true) {
 			// Main game actions
 			collisionCheck();
 			keebActions();
 			levelEditor();
-
-			
+			scrollCheck();
 			gravity();
 			collisionCheck();
 			updatePlayer();
-			scrollCheck();
+			
 
 			while (nextFrame > System.currentTimeMillis()) {
-				// Wait for next frame
+				if (paused) {
+					nextFrame = System.currentTimeMillis() + (1000 / fps);
+				}
 			}
 
 			// Set next frame time
@@ -92,13 +110,15 @@ public class Game {
 	 * Checks for input and does the associated actions
 	 */
 	public void keebActions() {
+		final int KEY_SPACE = 32;
+		final int KEY_CTRL = 17;
 		// Move Left
 		if (keeb.getKey('A')) {
 			playerX -= moveSpeed;
 		}
 
 		// Move Right
-		if (keeb.getKey((int) 'D')) {
+		if (keeb.getKey('D')) {
 			playerX += moveSpeed;
 		}
 
@@ -111,25 +131,25 @@ public class Game {
 //		}
 
 		// Jump (Space)
-		if (keeb.getKey(0) && !inJump) {
+		if (keeb.getKey(KEY_SPACE) && !inJump) {
 			jump();
 			inJump = true;
-		} else if (!keeb.getKey(0)) {
+		} else if (!keeb.getKey(KEY_SPACE)) {
 			jumpAgain = true;
 		}
 
 		// Brush paint (CTRL)
-		if (keeb.getKey(1)) {
+		if (keeb.getKey(KEY_CTRL)) {
 			paint = true;
 		} else {
 			paint = false;
 		}
 
 		// Undo paint (CTRL + Z)
-		if (keeb.getKey(1) && keeb.getKey('Z') && !undo) {
+		if (keeb.getKey(KEY_CTRL) && keeb.getKey('Z') && !undo) {
 			undoStroke();
 			System.out.println("d");
-		} else if (!keeb.getKey(1) || !keeb.getKey('Z')) {
+		} else if (!keeb.getKey(KEY_CTRL) || !keeb.getKey('Z')) {
 			undo = false;
 		}
 
@@ -144,28 +164,16 @@ public class Game {
 			gridToggle = false;
 		}
 
-		if (keeb.getKey('L')) {
-			System.out.print("Save or Load (S/L): ");
-			Scanner sc = new Scanner(System.in);
-			String type = sc.nextLine();
-			System.out.println("");
-
-			if (type.equals("S")) {
-				System.out.print("Save to lvl/");
+		if (keeb.getKey('T')) {
+			
+			if (!tToggle) {
+				gooey.levelEdit(true);
+				tToggle = true;
+			} else {
+				gooey.levelEdit(false);
+				tToggle = false;
 			}
-			if (type.equals("L")) {
-				System.out.print("Load from lvl/");
-			}
-
-			String dir = sc.nextLine();
-			dir = "lvl/" + dir;
-			ScreenFile sf = new ScreenFile();
-			if (type.equals("S")) {
-				screen.saveElements(dir);
-			}
-			if (type.equals("L")) {
-				screen.loadElements(dir);
-			}
+			keeb.setKey('T', false);
 		}
 
 		// System.out.println(mouse.getMouseWheelTime() + " " + nextFrame + " ");
@@ -204,14 +212,18 @@ public class Game {
 	}// updatePlayer
 
 	/**
+	 * Loads the selected level
+	 */
+	public void loadLevel(String dir) {
+		screen.loadElements(dir);
+	}// loadLevel
+
+	/**
 	 * Loads the current level
 	 */
-	public void loadLevel() {
-		for (int i = 0; i <= 8 * 32; i++) {
-			Block block = new Block(i, 256, "MouseAdded -1", "ground");
-			screen.add(block);
-		}
-	}// loadLevel
+	public void saveLevel(File file) {
+		screen.saveElements(file);
+	}// saveLevel
 
 	/**
 	 * Applies gravity to the player, using the velocity
@@ -234,9 +246,9 @@ public class Game {
 	 * Makes the player jump by making it's velocity negative
 	 */
 	public void jump() {
-		if(jumpAgain && onBlock) {
+		if (jumpAgain && onBlock) {
 			playerY--;
-			velocity = -15;
+			velocity = jumpOffset;
 			jumpAgain = false;
 		}
 	}// jump
@@ -281,40 +293,37 @@ public class Game {
 				}
 
 				if (up) {
-					System.out.println(block.getX() + " " + playerX);
 
 					// if on edge of block dont do that
 					if (block.getX() - playerX == 288 - 261) {
-						
+
 					} else if (block.getX() - playerX == 256 - 283) {
-						
+
 					} else {
 						playerY = block.getY() - (BLOCK_WIDTH - 1);
-						if (velocity > 0)  {
+						if (velocity > 0) {
 							velocity = 0;
 						}
 						inJump = false;
 						onBlock = true;
 					}
-					
+
 				} else if (down) {
-						if (block.getX() - playerX == 288 - 261) {
-							
-						} else if (block.getX() - playerX == 256 - 283) {
-							
-						} else {
+					if (block.getX() - playerX == 288 - 261) {
+
+					} else if (block.getX() - playerX == 256 - 283) {
+
+					} else {
 						playerY = block.getY() + BLOCK_WIDTH;
 						velocity = 0;
-						}
 					}
-				 else if (left) {
+				} else if (left) {
 					playerX = block.getX() - BLOCK_WIDTH;
 
 				} else if (right) {
 					playerX = block.getX() + BLOCK_WIDTH;
 				}
-				
-				
+
 			}
 			// This gives the newest block placed collision priority
 			this.onBlock = onBlock;
@@ -360,13 +369,12 @@ public class Game {
 		}
 		if (mouse.isMousePressed() && mouse.getMouseButton() == 'L') {
 			// New block is offset to start at the top left of the mouse
-			Block block = new Block((int) ((mouse.getX() - 8) / screen.getXRatio() + scroll),
-					(int) ((mouse.getY() - 32) / screen.getYRatio()), "MouseAdded " + currentStroke, currentItem);
+			Block block = new Block((int) mouse.getX() + scroll, (int) mouse.getY(), "MouseAdded " + currentStroke,
+					currentItem);
 
 			if (grid) {
-				block = new Block(((int) ((mouse.getX() - 8) / screen.getXRatio() + scroll) >> 5) << 5,
-						((int) ((mouse.getY() - 32) / screen.getYRatio()) >> 5) << 5, "MouseAdded " + currentStroke,
-						currentItem);
+				block = new Block(((int) (mouse.getX() + scroll) >> 5) << 5, ((int) mouse.getY() >> 5) << 5,
+						"MouseAdded " + currentStroke, currentItem);
 			}
 			screen.add(block);
 			// If the CTRL key isn't pressed, release the mouse button
@@ -377,12 +385,11 @@ public class Game {
 			lastStrokeFlag = true;
 		} else if (mouse.getMouseButton() == 'R' && mouse.isMousePressed()) {
 			// New block is offset to start at the top left of the mouse
-			Block block = new Block((int) ((mouse.getX() - 8) / screen.getXRatio() + scroll),
-					(int) ((mouse.getY() - 32) / screen.getYRatio()), "cursor", currentItem);
+			Block block = new Block((int) (mouse.getX() + scroll), (int) mouse.getY(), "cursor", currentItem);
 
 			if (grid) {
-				block = new Block(((int) ((mouse.getX() - 8) / screen.getXRatio() + scroll) >> 5) << 5,
-						((int) ((mouse.getY() - 32) / screen.getYRatio()) >> 5) << 5, "cursor", currentItem);
+				block = new Block((int) mouse.getX() + scroll >> 5 << 5, (int) mouse.getY() >> 5 << 5, "cursor",
+						currentItem);
 			}
 
 			screen.add(block);
@@ -413,6 +420,15 @@ public class Game {
 		}
 
 		return false;
+	}
+
+	public void setFlag(String flag, boolean val) {
+		if (flag.equals("paused")) {
+			paused = val;
+		}
+		if (flag.equals("grid")) {
+			grid = val;
+		}
 	}
 
 	// Medal System

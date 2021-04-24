@@ -5,6 +5,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.util.ArrayList;
 
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -27,7 +28,11 @@ public class MouseHandler extends JPanel implements MouseListener, MouseWheelLis
 	private char mouseButton = ' ';
 	// Screen object
 	private Frame frame;
+	
+	private Screen screen;
 
+	private ButtonActions action;
+	
 	private char mouseWheel = ' ';
 	private long mouseWheelTime = 0;
 
@@ -36,11 +41,13 @@ public class MouseHandler extends JPanel implements MouseListener, MouseWheelLis
 	 * 
 	 * @param frame The frame to listen to
 	 */
-	public void start(Frame frame) {
+	public void start(Frame frame, Screen screen, ButtonActions action) {
 		this.frame = frame;
+		this.screen = screen;
+		this.action = action;
 		frame.addMouseListener(this);
 		frame.addMouseWheelListener(this);
-
+		
 	}// start
 
 	/**
@@ -51,9 +58,13 @@ public class MouseHandler extends JPanel implements MouseListener, MouseWheelLis
 	 */
 	public void mousePressed(MouseEvent e) {
 		mouseButton = determineMouseButton(e);
-		mouseX = e.getX();
-		mouseY = e.getY();
-		isMousePressed = true;
+		if (!findClicks()) {
+
+			mouseX = e.getX();
+			mouseY = e.getY();
+			
+			isMousePressed = true;
+		}
 	}// mousePressed
 
 	/**
@@ -96,7 +107,7 @@ public class MouseHandler extends JPanel implements MouseListener, MouseWheelLis
 		// Global mouse position
 		Point mse = MouseInfo.getPointerInfo().getLocation();
 		// Screen mouse position
-		mouseX = mse.getX() - frm.getX();
+		mouseX = (mse.getX() - frm.getX() - 8 ) /  screen.getXRatio();
 		return (int) mouseX;
 	}// getX
 
@@ -111,7 +122,7 @@ public class MouseHandler extends JPanel implements MouseListener, MouseWheelLis
 		// Global mouse position
 		Point mse = MouseInfo.getPointerInfo().getLocation();
 		// Screen mouse position
-		mouseY = mse.getY() - frm.getY();
+		mouseY = (mse.getY() - frm.getY() - 32) / screen.getYRatio();
 		return (int) mouseY;
 	}// getY
 
@@ -125,7 +136,6 @@ public class MouseHandler extends JPanel implements MouseListener, MouseWheelLis
 			mb = 'R';
 		}
 		return mb;
-
 	}
 
 	public char getMouseButton() {
@@ -151,6 +161,25 @@ public class MouseHandler extends JPanel implements MouseListener, MouseWheelLis
 	
 	public long getMouseWheelTime() {
 		return mouseWheelTime;
+	}
+	
+	public boolean findClicks() {
+		boolean foundClick = false;
+		ArrayList<ScreenElement> buttons = screen.getAllOfType("button");
+		getX();
+		getY();
+		for (int i = 0; i < buttons.size(); i++) {
+			
+				Button button = (Button) buttons.get(i);
+				if (mouseX > button.getX() && mouseX < button.getX() + button.getHeight() && mouseY > button.getY()
+						&& mouseY < button.getY() + button.getWidth()) {
+					System.out.print("button!");
+					action.performAction(button.getID());
+					
+					foundClick = true;
+				}
+			}
+		return foundClick;
 	}
 	
 	/**

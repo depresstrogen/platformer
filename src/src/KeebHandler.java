@@ -32,33 +32,10 @@ public class KeebHandler {
 			 * @param e The current key
 			 */
 			public void keyPressed(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_A) {
-					keyboard['A'] = true;
-				}
-				if (e.getKeyCode() == KeyEvent.VK_D) {
-					keyboard['D'] = true;
-				}
-				if (e.getKeyCode() == KeyEvent.VK_W) {
-					keyboard['W'] = true;
-				}
-				if (e.getKeyCode() == KeyEvent.VK_S) {
-					keyboard['S'] = true;
-				}
-				if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-					keyboard[0] = true;
-				}
-				if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
-					keyboard[1] = true;
-				}
-				if (e.getKeyCode() == KeyEvent.VK_Z) {
-					keyboard['Z'] = true;
-				}
-				if (e.getKeyCode() == KeyEvent.VK_G) {
-					keyboard['G'] = true;
-				}
-				if (e.getKeyCode() == KeyEvent.VK_L) {
-					keyboard['L'] = true;
-				}
+			
+				
+				System.out.println(e.getKeyCode());
+				keyboard[e.getKeyCode()] = true;
 			}// keyPressed
 
 			/**
@@ -67,33 +44,7 @@ public class KeebHandler {
 			 * @param e The current key
 			 */
 			public void keyReleased(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_A) {
-					keyboard['A'] = false;
-				}
-				if (e.getKeyCode() == KeyEvent.VK_D) {
-					keyboard['D'] = false;
-				}
-				if (e.getKeyCode() == KeyEvent.VK_W) {
-					keyboard['W'] = false;
-				}
-				if (e.getKeyCode() == KeyEvent.VK_S) {
-					keyboard['S'] = false;
-				}
-				if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-					keyboard[0] = false;
-				}
-				if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
-					keyboard[1] = false;
-				}
-				if (e.getKeyCode() == KeyEvent.VK_Z) {
-					keyboard['Z'] = false;
-				}
-				if (e.getKeyCode() == KeyEvent.VK_G) {
-					keyboard['G'] = false;
-				}
-				if (e.getKeyCode() == KeyEvent.VK_L) {
-					keyboard['L'] = false;
-				}
+				keyboard[e.getKeyCode()] = false;
 			}// keyReleased
 		});
 	}// startKeyListener
@@ -116,6 +67,10 @@ public class KeebHandler {
 	public boolean getKey(int key) {
 		return keyboard[key];
 	}// getKey
+	
+	public void setKey (int key, boolean value) {
+		keyboard[key] = value;
+	}
 
 	/**
 	 * Prints whenever a key is held down

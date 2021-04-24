@@ -18,15 +18,19 @@ public class ScreenFile {
 	 * @param array     The ArrayList that you would like to save to the directory
 	 * @param directory The directory to save the ArrayList to
 	 */
-	public void writeArrayList(ArrayList<ScreenElement> array, String directory) {
+	public void writeArrayList(ArrayList<ScreenElement> array, File file) {
 		try {
-
+			
 			// ObjectOutputStream basically puts all of the raw data in one file
-			FileOutputStream fileOut = new FileOutputStream(directory);
+			System.out.print("a");
+			FileOutputStream fileOut = new FileOutputStream(file);
+			System.out.print("b");
 			ObjectOutputStream objectOut = new ObjectOutputStream(fileOut);
 			// Writes the ArrayList to the directory specified
-			objectOut.writeObject((ArrayList<ScreenElement>) array);
+			System.out.print("c");
+			objectOut.writeObject(array);
 			// Memory leaks are not cool
+			System.out.print("d");
 			objectOut.close();
 			fileOut.close();
 
@@ -44,10 +48,10 @@ public class ScreenFile {
 //					System.out.println(((Picture) element).getImage());
 //				}
 			}
-			System.out.println("ArrayList saved to " + directory);
+			System.out.println("ArrayList saved to " + file.getAbsolutePath());
 			// Everything has a catch
 		} catch (Exception e) {
-			System.err.println("Exception: " + e.getMessage());
+			e.printStackTrace();
 		}
 	}// writeArrayList
 
