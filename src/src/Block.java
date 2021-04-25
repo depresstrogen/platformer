@@ -1,5 +1,7 @@
 package src;
 
+import java.io.File;
+
 /**
  * Object that holds everything needed to display and use a block
  * 
@@ -8,7 +10,7 @@ package src;
  */
 public class Block extends ScreenElement {
 	private String imageDir;
-
+	private boolean canKill;
 	/**
 	 * Block constructor
 	 * 
@@ -17,10 +19,16 @@ public class Block extends ScreenElement {
 	 * @param id   The id of this block to find it later
 	 * @param type The type of block to be
 	 */
-	public Block(int x, int y, String id, String type) {
+	public Block(int x, int y, String id, String type, boolean canKill) {
 		super(x, y, id);
+		this.canKill = canKill;
 		imageDir = "img/blocks/" + type + ".png";
-		
+		File tmpDir = new File(imageDir);
+		if(tmpDir.exists()) {
+			
+		} else {
+			imageDir = "img/blocks/" + type + ".gif";
+		}
 	}// Block
 
 	/**
@@ -31,4 +39,9 @@ public class Block extends ScreenElement {
 	public String getImage() {
 		return imageDir;
 	}// getImage
+	
+	public boolean canKill() {
+		return canKill;
+	}
+	
 }// Block

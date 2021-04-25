@@ -159,8 +159,8 @@ public class MouseHandler extends JPanel implements MouseListener, MouseWheelLis
 		return mouseWheel;
 	}
 	
-	public long getMouseWheelTime() {
-		return mouseWheelTime;
+	public void resetMouseWheel() {
+		mouseWheel = ' ';
 	}
 	
 	public boolean findClicks() {

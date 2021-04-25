@@ -23,7 +23,7 @@ public class Game {
 	private KeebHandler keeb;
 	private MouseHandler mouse;
 	private GUIElements gooey;
-
+	private LevelEditor lvledit;
 	// Player coordinates
 	private int playerX = 200;
 	private int playerY = 0;
@@ -46,19 +46,13 @@ public class Game {
 	private boolean paused = false;
 	private boolean jumpAgain = false;
 	private boolean inJump = false;
-	private boolean paint = false;
-	private boolean undo = false;
 	private boolean grid = true;
-	private boolean gridToggle = false;
-	private boolean lastStrokeFlag = false;
 	private boolean onBlock = false;
 	private boolean tToggle = false;
-	
+
 	// Game timing
 	private int fps = 60;
 	private long nextFrame = System.currentTimeMillis() + (1000 / fps);
-
-	private int mouseWheelPos = 0;
 
 	/**
 	 * 
@@ -71,15 +65,15 @@ public class Game {
 		this.keeb = keeb;
 		this.mouse = mouse;
 		this.gooey = gooey;
+		lvledit = new LevelEditor(this, screen, mouse, keeb);
 	}// Game
 
 	/**
 	 * Starts the game, Runs the main game loop
 	 */
 	synchronized void start() {
-		
 		for (int i = 0; i <= 8 * 32; i++) {
-			Block block = new Block(i, 256, "MouseAdded -1", "ground");
+			Block block = new Block(i, 256, "MouseAdded -1", "ground", false);
 			screen.add(block);
 		}
 
@@ -88,12 +82,11 @@ public class Game {
 			// Main game actions
 			collisionCheck();
 			keebActions();
-			levelEditor();
+			lvledit.levelEditor();
 			scrollCheck();
 			gravity();
 			collisionCheck();
 			updatePlayer();
-			
 
 			while (nextFrame > System.currentTimeMillis()) {
 				if (paused) {
@@ -111,7 +104,6 @@ public class Game {
 	 */
 	public void keebActions() {
 		final int KEY_SPACE = 32;
-		final int KEY_CTRL = 17;
 		// Move Left
 		if (keeb.getKey('A')) {
 			playerX -= moveSpeed;
@@ -138,34 +130,8 @@ public class Game {
 			jumpAgain = true;
 		}
 
-		// Brush paint (CTRL)
-		if (keeb.getKey(KEY_CTRL)) {
-			paint = true;
-		} else {
-			paint = false;
-		}
-
-		// Undo paint (CTRL + Z)
-		if (keeb.getKey(KEY_CTRL) && keeb.getKey('Z') && !undo) {
-			undoStroke();
-			System.out.println("d");
-		} else if (!keeb.getKey(KEY_CTRL) || !keeb.getKey('Z')) {
-			undo = false;
-		}
-
-		if (keeb.getKey('G')) {
-			if (gridToggle) {
-
-			} else {
-				grid = !grid;
-				gridToggle = true;
-			}
-		} else {
-			gridToggle = false;
-		}
-
 		if (keeb.getKey('T')) {
-			
+
 			if (!tToggle) {
 				gooey.levelEdit(true);
 				tToggle = true;
@@ -174,24 +140,6 @@ public class Game {
 				tToggle = false;
 			}
 			keeb.setKey('T', false);
-		}
-
-		// System.out.println(mouse.getMouseWheelTime() + " " + nextFrame + " ");
-		if (mouse.getMouseWheelTime() > nextFrame - 32) {
-			int wheelCap = 3;
-			if (mouse.getMouseWheel() == 'U') {
-				mouseWheelPos--;
-			} else if (mouse.getMouseWheel() == 'D') {
-				mouseWheelPos++;
-			}
-
-			if (mouseWheelPos < 0) {
-				mouseWheelPos = wheelCap;
-			}
-			if (mouseWheelPos > wheelCap) {
-				mouseWheelPos = 0;
-			}
-
 		}
 
 	}// keebActions
@@ -221,8 +169,8 @@ public class Game {
 	/**
 	 * Loads the current level
 	 */
-	public void saveLevel(File file) {
-		screen.saveElements(file);
+	public void saveLevel(String dir) {
+		screen.saveElements(dir);
 	}// saveLevel
 
 	/**
@@ -259,7 +207,8 @@ public class Game {
 	public void collisionCheck() {
 		// Can be changed to the current block's size
 		final int BLOCK_WIDTH = 32;
-
+		boolean die = true;
+		int blocksCollided = 0;
 		ArrayList<ScreenElement> blocks = screen.getAllOfType("block");
 		boolean onBlock = false;
 		for (int i = 0; i < blocks.size(); i++) {
@@ -272,6 +221,7 @@ public class Game {
 			// If in the block's width
 			if (block.getY() - BLOCK_WIDTH < playerY && block.getY() + BLOCK_WIDTH > playerY
 					&& block.getX() - BLOCK_WIDTH < playerX && block.getX() + BLOCK_WIDTH > playerX) {
+				blocksCollided ++;
 				// Update the position to right outside the block's width
 				// Top (Gets priority as it can cancel actions)
 				if (block.getY() - BLOCK_WIDTH < playerY && block.getY() - (BLOCK_WIDTH / 2) > playerY) {
@@ -291,7 +241,9 @@ public class Game {
 				if (block.getX() + BLOCK_WIDTH > playerX && block.getX() + (BLOCK_WIDTH / 2) < playerX) {
 					right = true;
 				}
-
+				
+				
+				
 				if (up) {
 
 					// if on edge of block dont do that
@@ -324,10 +276,20 @@ public class Game {
 					playerX = block.getX() + BLOCK_WIDTH;
 				}
 
+				if(!block.canKill()) 
+					die = false;
+				}
+				
+				
 			}
 			// This gives the newest block placed collision priority
 			this.onBlock = onBlock;
-		}
+			
+			if(die && blocksCollided > 0) {
+				die();
+			}
+			
+		
 	}// collisionCheck
 
 	/**
@@ -356,64 +318,6 @@ public class Game {
 		return scroll;
 	}// getScroll
 
-	/**
-	 * Runs the level editor, allows you to place blocks with the mouse
-	 */
-	public void levelEditor() {
-		String[] blockList = { "ground", "dirt", "brick", "grid" };
-		String currentItem = blockList[mouseWheelPos];
-		try {
-			screen.removeID("cursor");
-		} catch (Exception e) {
-			// No Cursor
-		}
-		if (mouse.isMousePressed() && mouse.getMouseButton() == 'L') {
-			// New block is offset to start at the top left of the mouse
-			Block block = new Block((int) mouse.getX() + scroll, (int) mouse.getY(), "MouseAdded " + currentStroke,
-					currentItem);
-
-			if (grid) {
-				block = new Block(((int) (mouse.getX() + scroll) >> 5) << 5, ((int) mouse.getY() >> 5) << 5,
-						"MouseAdded " + currentStroke, currentItem);
-			}
-			screen.add(block);
-			// If the CTRL key isn't pressed, release the mouse button
-			if (!paint) {
-				mouse.removePressedFlag();
-			}
-			// Shows the mouse button is still held
-			lastStrokeFlag = true;
-		} else if (mouse.getMouseButton() == 'R' && mouse.isMousePressed()) {
-			// New block is offset to start at the top left of the mouse
-			Block block = new Block((int) (mouse.getX() + scroll), (int) mouse.getY(), "cursor", currentItem);
-
-			if (grid) {
-				block = new Block((int) mouse.getX() + scroll >> 5 << 5, (int) mouse.getY() >> 5 << 5, "cursor",
-						currentItem);
-			}
-
-			screen.add(block);
-		} else {
-			// If the mouse button was held last frame
-			if (lastStrokeFlag) {
-				// Increment the stroke
-				currentStroke++;
-				lastStrokeFlag = false;
-
-			}
-		}
-	}// levelEditor
-
-	/**
-	 * Removes the previous stroke, no matter how many blocks it was
-	 */
-	public void undoStroke() {
-		currentStroke--;
-		screen.removeAllID("MouseAdded " + currentStroke);
-		// Makes it so it is only run once per key press
-		undo = true;
-	}// undoStroke
-
 	public boolean getFlag(String flag) {
 		if (flag.equals("grid")) {
 			return grid;
@@ -431,5 +335,12 @@ public class Game {
 		}
 	}
 
-	// Medal System
+	public void die() {
+		playerX = 200;
+		playerY = 0;
+		scroll = 0;
+	}
+	
+	// Medal System?
+	// World Map?
 }

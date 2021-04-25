@@ -32,9 +32,6 @@ public class KeebHandler {
 			 * @param e The current key
 			 */
 			public void keyPressed(KeyEvent e) {
-			
-				
-				System.out.println(e.getKeyCode());
 				keyboard[e.getKeyCode()] = true;
 			}// keyPressed
 

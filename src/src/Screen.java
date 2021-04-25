@@ -48,7 +48,9 @@ public class Screen extends JPanel {
 	// Time management (Literally)
 	private int fps = 60;
 	private long nextFrame = System.currentTimeMillis() + (1000 / fps);
-
+	
+	private int accFPS = 0;
+	private long lastFPS = System.currentTimeMillis();
 	/**
 	 * Constructs the jFrame, mouse listener and key listener
 	 * 
@@ -63,24 +65,27 @@ public class Screen extends JPanel {
 		// Start JFrame
 		frameSetup();
 		runGame();
-		
-		
-		
+
 		// lol while true go brrr
 		while (true) {
 			ratio();
 			repaint();
 
 			while (nextFrame > System.currentTimeMillis()) {
-				// Wait for next frame time
+				repaint();
 			}
+			if (System.currentTimeMillis() - lastFPS >= 1000) {
+				
+				System.out.println(accFPS);
+				accFPS = 0;
+				lastFPS = System.currentTimeMillis();
+			}
+			
 			nextFrame = System.currentTimeMillis() + (1000 / fps);
 		}
 
 	}// Screen
 
-	
-	
 	/**
 	 * Constructs the JFrame, all other required objects
 	 */
@@ -93,9 +98,9 @@ public class Screen extends JPanel {
 		gooey = new GUIElements(this, frame);
 		game = new Game(this, keeb, mouse, gooey);
 		keeb.startKeyListener(frame);
-		actions = new ButtonActions(this,frame,game);
+		actions = new ButtonActions(this, frame, game);
 		mouse.start(frame, this, actions);
-		
+
 	}// frameSetup
 
 	/**
@@ -107,65 +112,87 @@ public class Screen extends JPanel {
 	/**
 	 *
 	 */
+	/**
+	 *
+	 */
 	public void paint(Graphics g) {
 		// Main Paint Loop
 		super.paint(g);
-		Graphics2D g2d = (Graphics2D) g;
+		Graphics2D g2d;
+		
 		int scroll = game.getScroll();
-		// Loops through each item in the ArrayList and paints it depending which object
-		// type it is
-		if(game.getFlag("grid")) {
-			g2d.setColor(Color.BLACK);
-			for (double i = 0; i < 720 * ratioY; i += 32 * ratioY) {
-				g2d.drawLine(0, (int) i, (int) (1280 * ratioY), (int) i);
-			}
-			for (double i = -1; i < 1280 * ratioX; i += 32 * ratioX) {
-				g2d.drawLine((int) (i - (scroll % 32) * ratioX), 0, (int) (i - (scroll % 32) * ratioX), (int) (720 * ratioX));
-			}
+		
+		BufferedImage  screenImg = new BufferedImage(BASEX, BASEY, BufferedImage.TYPE_INT_RGB);
+		
+		if(ratioX == 1.0 && ratioY == 1.0) {
+			g2d = (Graphics2D) g;
+		} else {
+			g2d = screenImg.createGraphics();
 		}
 		
+		
+		g2d.setColor(Color.WHITE);
+		g2d.fillRect(0, 0, BASEX, BASEY);
+		
+		// Loops through each item in the ArrayList and paints it depending which object
+		// type it is
+		if (game.getFlag("grid")) {
+			g2d.setColor(Color.BLACK);
+			for (double i = 0; i < 720; i += 32) {
+				g2d.drawLine(0, (int) i, (int) (1280), (int) i);
+			}
+			for (double i = -1; i < 1280; i += 32) {
+				g2d.drawLine((int) (i - (scroll % 32)), 0, (int) (i - (scroll % 32)), (int) (720));
+			}
+		}
+
 		for (int i = 0; i < elements.size(); i++) {
 			ScreenElement element = elements.get(i);
 
 			if (element instanceof Player) {
 				Player player = (Player) element;
 				Image image = Toolkit.getDefaultToolkit().getImage(player.getImage());
-				g2d.drawImage(image, (int) ((player.getX() - scroll) * ratioX), (int) (player.getY() * ratioY),
-						(int) (image.getHeight(this) * ratioX * player.getScale()),
-						(int) (image.getWidth(this) * ratioY * player.getScale()), null);
+				g2d.drawImage(image, (int) ((player.getX() - scroll)), (int) (player.getY()),
+						(int) (image.getHeight(this) * player.getScale()),
+						(int) (image.getWidth(this) * player.getScale()), null);
 			}
 
 			else if (element instanceof Block) {
 				Block block = (Block) element;
 				Image image = Toolkit.getDefaultToolkit().getImage(block.getImage());
-				g2d.drawImage(image, (int) ((block.getX() - scroll) * ratioX), (int) (block.getY() * ratioY),
-						(int) (image.getHeight(this) * ratioX), (int) (image.getWidth(this) * ratioY), null);
-			}
-			else if (element instanceof TextButton) {
+				g2d.drawImage(image, (int) ((block.getX() - scroll)), (int) (block.getY()),
+						(int) (image.getHeight(this)), (int) (image.getWidth(this)), null);
+			} else if (element instanceof TextButton) {
 				TextButton button = (TextButton) element;
 				g2d.setColor(button.getColor());
-				g2d.fillRect((int) ((button.getX()) * ratioX), (int) (button.getY() * ratioY),
-						(int) (button.getHeight() * ratioX), (int) (button.getWidth() * ratioY));
+				g2d.fillRect((int) ((button.getX())), (int) (button.getY()), (int) (button.getHeight()),
+						(int) (button.getWidth()));
 				int size = button.getWidth() / 2;
 				g2d.setColor(Color.black);
 				g2d.setFont(new Font(button.getFont(), Font.PLAIN, size));
-				g2d.drawString(button.getText(), button.getX() + 16, button.getY() + (int) ((button.getWidth() + (size / 2)) / 2));
-			}
-			else if (element instanceof Button) {
+				g2d.drawString(button.getText(), button.getX() + 16,
+						button.getY() + (int) ((button.getWidth() + (size / 2)) / 2));
+			} else if (element instanceof Button) {
 				Button button = (Button) element;
 				g2d.setColor(button.getColor());
-				g2d.fillRect((int) ((button.getX()) * ratioX), (int) (button.getY() * ratioY),
-						(int) (button.getHeight() * ratioX), (int) (button.getWidth() * ratioY));
-			}
-			else if (elements.get(i) instanceof Text) {
+				g2d.fillRect((int) ((button.getX())), (int) (button.getY()), (int) (button.getHeight()),
+						(int) (button.getWidth()));
+			} else if (elements.get(i) instanceof Text) {
 				Text text = (Text) elements.get(i);
 				g2d.setColor(text.getColor());
 				g2d.setFont(new Font(text.getFont(), Font.PLAIN, text.getFontSize()));
 				g2d.drawString(text.getText(), text.getX(), text.getY());
 			}
-			
-		}
 
+		}
+		
+		if(ratioX == 1 && ratioY == 1) {
+			
+		} else {
+			Graphics2D paint = (Graphics2D) g;
+			paint.drawImage(screenImg, 0, 0, (int) (1280 * ratioX) , (int)  (720 * ratioY), null);
+		}		
+		accFPS ++;
 		
 	}// paint
 
@@ -243,7 +270,7 @@ public class Screen extends JPanel {
 					typeArr.add(elements.get(i));
 				}
 			}
-			
+
 		}
 		return typeArr;
 	}// getAllOfType
@@ -294,7 +321,7 @@ public class Screen extends JPanel {
 	 * 
 	 * @param file The directory to save the elements to
 	 */
-	public void saveElements(File file) {
+	public void saveElements(String file) {
 		ScreenFile io = new ScreenFile();
 		io.writeArrayList(elements, file);
 	}// saveElements
@@ -354,8 +381,33 @@ public class Screen extends JPanel {
 		};
 		gameThread.start();
 	}// runGame
-	
+
 	public GUIElements guiElements() {
 		return gooey;
+	}
+
+	public void screenClean() {
+		int n = 0;
+		System.out.println(elements.size());
+
+		for (int i = 0; i < elements.size(); i++) {
+			for (int j = i + 1; j < elements.size(); j++) {
+				if (elements.get(i).getX() == elements.get(j).getX()
+						&& elements.get(i).getY() == elements.get(j).getY()) {
+					elements.remove(i);
+
+					n++;
+					j = elements.size();
+				}
+			}
+		}
+
+		System.out.println(elements.size());
+		System.out.println("Removed " + n + " useless elements");
+
+		if (n != 0) {
+			screenClean();
+		}
+
 	}
 }// Screen

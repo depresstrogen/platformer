@@ -22,6 +22,8 @@ public class ButtonActions {
 		action = action.toLowerCase();
 		final JFileChooser fc = new JFileChooser();
 		int returnVal;
+		
+		fc.setCurrentDirectory(new File ("lvl"));
 		switch (action) {
 
 		case ("load"):
@@ -41,7 +43,11 @@ public class ButtonActions {
 			returnVal = fc.showSaveDialog(null);
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				File file = fc.getSelectedFile();
-				game.saveLevel(file);
+				String dir = file.getPath();
+				if(!dir.substring(dir.length() - 4).equals(".lvl")) {
+					dir = dir + ".lvl";
+				}
+				game.saveLevel(dir);
 
 			} else {
 				// canceled
