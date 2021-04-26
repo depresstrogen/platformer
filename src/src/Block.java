@@ -11,6 +11,15 @@ import java.io.File;
 public class Block extends ScreenElement {
 	private String imageDir;
 	private boolean canKill;
+	private String type;
+	private int blockCode;
+	
+	private String[] blockList = BlockTypes.blockList;
+	
+	public Block() {
+		super(0, 0, "dummy");
+	}
+	
 	/**
 	 * Block constructor
 	 * 
@@ -20,8 +29,24 @@ public class Block extends ScreenElement {
 	 * @param type The type of block to be
 	 */
 	public Block(int x, int y, String id, String type, boolean canKill) {
+		
+		
+		
 		super(x, y, id);
+		
+		
+		
+		for(int i = 0; i < blockList.length; i++) {
+			if (type.equals(blockList[i])) {
+				blockCode = i;
+				i = blockList.length;
+			}
+		}
+		
+		
 		this.canKill = canKill;
+		this.type = type;
+		
 		imageDir = "img/blocks/" + type + ".png";
 		File tmpDir = new File(imageDir);
 		if(tmpDir.exists()) {
@@ -40,8 +65,21 @@ public class Block extends ScreenElement {
 		return imageDir;
 	}// getImage
 	
+	public String getType() {
+		return type;
+	}
+	
+	public int getBlockCode() {
+		return blockCode;
+	}
+	
+	
 	public boolean canKill() {
 		return canKill;
+	}
+	
+	public String[] getBlockList() {
+		return blockList;
 	}
 	
 }// Block

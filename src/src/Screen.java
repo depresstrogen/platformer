@@ -23,7 +23,9 @@ public class Screen extends JPanel {
 
 	// Everything to be displayed on screen is stored here
 	private ArrayList<ScreenElement> elements = new ArrayList<ScreenElement>();
-
+	
+	private Image blockPics[] = new Image[6];
+	
 	// The game runs at 720p then scales
 	private final int BASEX = 1280;
 	private final int BASEY = 720;
@@ -38,7 +40,8 @@ public class Screen extends JPanel {
 
 	// The game object
 	public Game game;
-
+	public Screen screen = this;
+	
 	// IO objects
 	private MouseHandler mouse = new MouseHandler();
 	private KeebHandler keeb = new KeebHandler();
@@ -48,9 +51,12 @@ public class Screen extends JPanel {
 	// Time management (Literally)
 	private int fps = 60;
 	private long nextFrame = System.currentTimeMillis() + (1000 / fps);
-	
+
 	private int accFPS = 0;
 	private long lastFPS = System.currentTimeMillis();
+
+	private String[] blockList = {"ground", "dirt", "brick", "grid", "lavatop", "lavabase"};
+	
 	/**
 	 * Constructs the jFrame, mouse listener and key listener
 	 * 
@@ -72,15 +78,15 @@ public class Screen extends JPanel {
 			repaint();
 
 			while (nextFrame > System.currentTimeMillis()) {
-				repaint();
+				
 			}
 			if (System.currentTimeMillis() - lastFPS >= 1000) {
 				
-				System.out.println(accFPS);
+				System.out.println("Screen FPS: " + accFPS);
 				accFPS = 0;
 				lastFPS = System.currentTimeMillis();
 			}
-			
+
 			nextFrame = System.currentTimeMillis() + (1000 / fps);
 		}
 
@@ -95,9 +101,9 @@ public class Screen extends JPanel {
 		frame.setSize(windowX, windowY);
 		frame.setVisible(true);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		loadBlocks();
 		gooey = new GUIElements(this, frame);
 		game = new Game(this, keeb, mouse, gooey);
-		keeb.startKeyListener(frame);
 		actions = new ButtonActions(this, frame, game);
 		mouse.start(frame, this, actions);
 
@@ -115,25 +121,24 @@ public class Screen extends JPanel {
 	/**
 	 *
 	 */
-	public void paint(Graphics g) {
+	public void paintComponent(Graphics g) {
 		// Main Paint Loop
-		super.paint(g);
+		super.paintComponent(g);
 		Graphics2D g2d;
 		
 		int scroll = game.getScroll();
-		
-		BufferedImage  screenImg = new BufferedImage(BASEX, BASEY, BufferedImage.TYPE_INT_RGB);
-		
-		if(ratioX == 1.0 && ratioY == 1.0) {
+
+		BufferedImage screenImg = new BufferedImage(BASEX, BASEY, BufferedImage.TYPE_INT_RGB);
+
+		if (ratioX == 1.0 && ratioY == 1.0) {
 			g2d = (Graphics2D) g;
 		} else {
 			g2d = screenImg.createGraphics();
 		}
-		
-		
+
 		g2d.setColor(Color.WHITE);
 		g2d.fillRect(0, 0, BASEX, BASEY);
-		
+
 		// Loops through each item in the ArrayList and paints it depending which object
 		// type it is
 		if (game.getFlag("grid")) {
@@ -148,21 +153,30 @@ public class Screen extends JPanel {
 
 		for (int i = 0; i < elements.size(); i++) {
 			ScreenElement element = elements.get(i);
+			if (element instanceof Block) {
+				if (element.getX() < scroll - 30 || element.getX() > scroll + 1280) {
+					
+				} else {
+					
+					Block block = (Block) element;
+					g2d.drawImage(blockPics[block.getBlockCode()], (int) ((block.getX() - scroll)), (int) (block.getY()), null);
+				}
+			} else if (element instanceof Player) {
+				
+				try {
+					Player player = (Player) element;
+					Image img = Toolkit.getDefaultToolkit().getImage(player.getImage());
+					
+					g2d.drawImage(img, (int) ((player.getX() - scroll)), (int) (player.getY()),
+							(int) (img.getHeight(this) * player.getScale()),
+							(int) (img.getWidth(this) * player.getScale()), null);
+				    
+				} catch (Exception e) {
 
-			if (element instanceof Player) {
-				Player player = (Player) element;
-				Image image = Toolkit.getDefaultToolkit().getImage(player.getImage());
-				g2d.drawImage(image, (int) ((player.getX() - scroll)), (int) (player.getY()),
-						(int) (image.getHeight(this) * player.getScale()),
-						(int) (image.getWidth(this) * player.getScale()), null);
+				}
+				
 			}
-
-			else if (element instanceof Block) {
-				Block block = (Block) element;
-				Image image = Toolkit.getDefaultToolkit().getImage(block.getImage());
-				g2d.drawImage(image, (int) ((block.getX() - scroll)), (int) (block.getY()),
-						(int) (image.getHeight(this)), (int) (image.getWidth(this)), null);
-			} else if (element instanceof TextButton) {
+			else if (element instanceof TextButton) {
 				TextButton button = (TextButton) element;
 				g2d.setColor(button.getColor());
 				g2d.fillRect((int) ((button.getX())), (int) (button.getY()), (int) (button.getHeight()),
@@ -185,15 +199,15 @@ public class Screen extends JPanel {
 			}
 
 		}
-		
-		if(ratioX == 1 && ratioY == 1) {
-			
+
+		if (ratioX == 1 && ratioY == 1) {
+
 		} else {
 			Graphics2D paint = (Graphics2D) g;
-			paint.drawImage(screenImg, 0, 0, (int) (1280 * ratioX) , (int)  (720 * ratioY), null);
-		}		
-		accFPS ++;
-		
+			paint.drawImage(screenImg, 0, 0, (int) (1280 * ratioX), (int) (720 * ratioY), null);
+		}
+		accFPS++;
+
 	}// paint
 
 	/**
@@ -380,12 +394,29 @@ public class Screen extends JPanel {
 			}
 		};
 		gameThread.start();
+		
+		Thread keebThread = new Thread() {
+			public void run() {
+				keeb.startKeyListener(frame);
+			}
+		};
+		keebThread.start();
+		
 	}// runGame
 
 	public GUIElements guiElements() {
 		return gooey;
 	}
 
+	public void loadBlocks() {
+		String[] blockList = { "ground", "dirt", "brick", "grid", "lavatop", "lavabase"};
+		for(int i = 0; i < blockList.length; i++) {
+			Block block  = new Block(-1,-1,"loadblock", blockList[i], false);
+			Image image = Toolkit.getDefaultToolkit().getImage(block.getImage());
+			blockPics[i] = image;
+		}
+	}
+	
 	public void screenClean() {
 		int n = 0;
 		System.out.println(elements.size());

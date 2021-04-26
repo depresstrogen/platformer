@@ -80,18 +80,21 @@ public class Game {
 		updatePlayer();
 		while (true) {
 			// Main game actions
-			collisionCheck();
+			//collisionCheck();
 			keebActions();
 			lvledit.levelEditor();
 			scrollCheck();
 			gravity();
 			collisionCheck();
 			updatePlayer();
-
+			screen.repaint();
 			while (nextFrame > System.currentTimeMillis()) {
 				if (paused) {
 					nextFrame = System.currentTimeMillis() + (1000 / fps);
 				}
+				
+				
+				
 			}
 
 			// Set next frame time
@@ -267,7 +270,9 @@ public class Game {
 
 					} else {
 						playerY = block.getY() + BLOCK_WIDTH;
-						velocity = 0;
+						if (velocity < 0) {
+							velocity = 0;
+						}
 					}
 				} else if (left) {
 					playerX = block.getX() - BLOCK_WIDTH;

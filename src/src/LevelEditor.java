@@ -14,7 +14,7 @@ public class LevelEditor {
 	private int scroll;
 	private boolean undo = false;
 	
-	private String[] blockList = { "ground", "dirt", "brick", "grid", "lavatop", "lavabase"};
+	private String[] blockList = BlockTypes.blockList;
 	private String currentItem = blockList[mouseWheelPos];
 	public LevelEditor(Game game, Screen screen, MouseHandler mouse, KeebHandler keeb) {
 		this.game = game;
@@ -31,6 +31,9 @@ public class LevelEditor {
 		} catch (Exception e) {
 			// No Cursor
 		}
+		Block block = new Block();
+		blockList = block.getBlockList();
+		currentItem = blockList[mouseWheelPos];
 		final int KEY_CTRL = 17;
 		scroll = game.getScroll();
 		

@@ -20,13 +20,14 @@ public class ButtonActions {
 
 	public void performAction(String action) {
 		action = action.toLowerCase();
-		final JFileChooser fc = new JFileChooser();
+		JFileChooser fc;
 		int returnVal;
 		
-		fc.setCurrentDirectory(new File ("lvl"));
 		switch (action) {
 
 		case ("load"):
+			fc = new JFileChooser();
+			fc.setCurrentDirectory(new File ("lvl"));
 			returnVal = fc.showOpenDialog(null);
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				File file = fc.getSelectedFile();
@@ -38,6 +39,8 @@ public class ButtonActions {
 			break;
 
 		case ("save"):
+			fc = new JFileChooser();
+			fc.setCurrentDirectory(new File ("lvl"));
 			screen.guiElements().levelEdit(false);
 			game.setFlag("paused", true);
 			returnVal = fc.showSaveDialog(null);
