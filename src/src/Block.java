@@ -13,13 +13,14 @@ public class Block extends ScreenElement {
 	private boolean canKill;
 	private String type;
 	private int blockCode;
-	
+	private int height;
+	private int width;
 	private String[] blockList = BlockTypes.blockList;
-	
+
 	public Block() {
 		super(0, 0, "dummy");
 	}
-	
+
 	/**
 	 * Block constructor
 	 * 
@@ -29,31 +30,52 @@ public class Block extends ScreenElement {
 	 * @param type The type of block to be
 	 */
 	public Block(int x, int y, String id, String type, boolean canKill) {
-		
-		
-		
+
 		super(x, y, id);
-		
-		
-		
-		for(int i = 0; i < blockList.length; i++) {
+
+		for (int i = 0; i < blockList.length; i++) {
 			if (type.equals(blockList[i])) {
 				blockCode = i;
 				i = blockList.length;
 			}
 		}
-		
-		
+
 		this.canKill = canKill;
 		this.type = type;
-		
+
 		imageDir = "img/blocks/" + type + ".png";
 		File tmpDir = new File(imageDir);
-		if(tmpDir.exists()) {
-			
+		if (tmpDir.exists()) {
+
 		} else {
 			imageDir = "img/blocks/" + type + ".gif";
 		}
+		height = 32;
+		width = 32;
+	}// Block
+
+	public Block(int x, int y, String id, String type, boolean canKill, int height, int width) {
+		super(x, y, id);
+
+		for (int i = 0; i < blockList.length; i++) {
+			if (type.equals(blockList[i])) {
+				blockCode = i;
+				i = blockList.length;
+			}
+		}
+
+		this.canKill = canKill;
+		this.type = type;
+
+		imageDir = "img/blocks/" + type + ".png";
+		File tmpDir = new File(imageDir);
+		if (tmpDir.exists()) {
+
+		} else {
+			imageDir = "img/blocks/" + type + ".gif";
+		}
+		this.height = height;
+		this.width = width;
 	}// Block
 
 	/**
@@ -64,22 +86,29 @@ public class Block extends ScreenElement {
 	public String getImage() {
 		return imageDir;
 	}// getImage
-	
+
 	public String getType() {
 		return type;
 	}
-	
+
 	public int getBlockCode() {
 		return blockCode;
 	}
-	
-	
+
 	public boolean canKill() {
 		return canKill;
 	}
-	
+
 	public String[] getBlockList() {
 		return blockList;
+	}
+
+	public int getWidth() {
+		return width;
+	}
+	
+	public int getHeight() {
+		return height;
 	}
 	
 }// Block

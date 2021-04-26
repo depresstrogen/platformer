@@ -39,6 +39,7 @@ public class ButtonActions {
 			break;
 
 		case ("save"):
+			screen.screenClean();
 			fc = new JFileChooser();
 			fc.setCurrentDirectory(new File ("lvl"));
 			screen.guiElements().levelEdit(false);

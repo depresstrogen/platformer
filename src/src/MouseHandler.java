@@ -169,7 +169,6 @@ public class MouseHandler extends JPanel implements MouseListener, MouseWheelLis
 		getX();
 		getY();
 		for (int i = 0; i < buttons.size(); i++) {
-			
 				Button button = (Button) buttons.get(i);
 				if (mouseX > button.getX() && mouseX < button.getX() + button.getHeight() && mouseY > button.getY()
 						&& mouseY < button.getY() + button.getWidth()) {
