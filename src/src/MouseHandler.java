@@ -14,7 +14,7 @@ import javax.swing.SwingUtilities;
  * Gets the state of the mouse and returns it to whatever needs the input
  * 
  * @author Riley Power
- * @version April 19 2021
+ * @version April 26 2021
  */
 public class MouseHandler extends JPanel implements MouseListener, MouseWheelListener {
 
@@ -25,29 +25,32 @@ public class MouseHandler extends JPanel implements MouseListener, MouseWheelLis
 	// Mouse button flag
 	private boolean isMousePressed = false;
 
+	// The current mouse button pressed
 	private char mouseButton = ' ';
-	// Screen object
-	private Frame frame;
-	
-	private Screen screen;
 
+	// IO objects
+	private Frame frame;
+	private Screen screen;
 	private ButtonActions action;
-	
+
+	// Mouse wheel position
 	private char mouseWheel = ' ';
-	private long mouseWheelTime = 0;
 
 	/**
 	 * Starts the mouse handler (listener) using the provided JFrame as the screen
 	 * 
-	 * @param frame The frame to listen to
+	 * @param frame  The frame to listen to
+	 * @param screen The screen to interface with
+	 * @param action The object to call if a button is pressed
 	 */
 	public void start(Frame frame, Screen screen, ButtonActions action) {
 		this.frame = frame;
 		this.screen = screen;
 		this.action = action;
+		// Mouse Listeners
 		frame.addMouseListener(this);
 		frame.addMouseWheelListener(this);
-		
+
 	}// start
 
 	/**
@@ -57,12 +60,14 @@ public class MouseHandler extends JPanel implements MouseListener, MouseWheelLis
 	 * @param e The mouse event that triggers the method
 	 */
 	public void mousePressed(MouseEvent e) {
+		// Sets the mouse button state
 		mouseButton = determineMouseButton(e);
+		// Looks for buttons to press
 		if (!findClicks()) {
-
+			// Updates mouse position
 			mouseX = e.getX();
 			mouseY = e.getY();
-			
+			// Set mouse to be pressed
 			isMousePressed = true;
 		}
 	}// mousePressed
@@ -74,9 +79,14 @@ public class MouseHandler extends JPanel implements MouseListener, MouseWheelLis
 	 * @param e The mouse event that triggers the method
 	 */
 	public void mouseReleased(MouseEvent e) {
+		// Sets the mouse button state
 		mouseButton = determineMouseButton(e);
+
+		// Updates mouse position
 		mouseX = e.getX();
 		mouseY = e.getY();
+		mouseY = e.getY();
+		// Set mouse to be released
 		isMousePressed = false;
 	}// mouseReleased
 
@@ -107,7 +117,7 @@ public class MouseHandler extends JPanel implements MouseListener, MouseWheelLis
 		// Global mouse position
 		Point mse = MouseInfo.getPointerInfo().getLocation();
 		// Screen mouse position
-		mouseX = (mse.getX() - frm.getX() - 8 ) /  screen.getXRatio();
+		mouseX = (mse.getX() - frm.getX() - 8) / screen.getXRatio();
 		return (int) mouseX;
 	}// getX
 
@@ -126,61 +136,91 @@ public class MouseHandler extends JPanel implements MouseListener, MouseWheelLis
 		return (int) mouseY;
 	}// getY
 
+	/**
+	 * Determines what button on the mouse was pressed
+	 * 
+	 * @param e The MouseEvent which triggered this
+	 * @return The button pressed
+	 */
 	private char determineMouseButton(MouseEvent e) {
+		// Default to left
 		char mb = 'L';
-		if (SwingUtilities.isLeftMouseButton(e)) {
-			mb = 'L';
-		} else if (SwingUtilities.isMiddleMouseButton(e)) {
+		if (SwingUtilities.isMiddleMouseButton(e)) {
 			mb = 'M';
 		} else if (SwingUtilities.isRightMouseButton(e)) {
 			mb = 'R';
 		}
 		return mb;
-	}
+	}// determineMouseButton
 
+	/**
+	 * Returns the current mouse button pressed
+	 * 
+	 * @return mouseButton
+	 */
 	public char getMouseButton() {
 		return mouseButton;
-	}
+	}// getMouseButton
 
+	/**
+	 * Updates the mouse wheel position
+	 * 
+	 * @param e The MouseWheelEvent that triggered this
+	 */
 	public void mouseWheelMoved(MouseWheelEvent e) {
-		System.out.println("m");
-
 		if (e.getWheelRotation() < 0) {
 			mouseWheel = 'U';
-			System.out.println("mouse wheel Up");
+			// Mouse wheel up
 		} else {
 			mouseWheel = 'D';
-			System.out.println("mouse wheel Down");
+			// Mouse wheel down
 		}
-		mouseWheelTime = System.currentTimeMillis();
 	}
 
+	/**
+	 * Returns the state of the mouse wheel
+	 * 
+	 * @return mouseWheel
+	 */
 	public char getMouseWheel() {
 		return mouseWheel;
-	}
-	
+	}// getMouseWheel
+
+	/**
+	 * Sets the mouse wheel to be blank
+	 */
 	public void resetMouseWheel() {
 		mouseWheel = ' ';
 	}
-	
+
+	/**
+	 * Finds what button the user has clicked on
+	 * 
+	 * @return if the user clicked on a button or not
+	 */
 	public boolean findClicks() {
 		boolean foundClick = false;
+		// Get every button
 		ArrayList<ScreenElement> buttons = screen.getAllOfType("button");
+		// Update mouse coordinates
 		getX();
 		getY();
+		// For every button
 		for (int i = 0; i < buttons.size(); i++) {
-				Button button = (Button) buttons.get(i);
-				if (mouseX > button.getX() && mouseX < button.getX() + button.getHeight() && mouseY > button.getY()
-						&& mouseY < button.getY() + button.getWidth()) {
-					System.out.print("button!");
-					action.performAction(button.getID());
-					
-					foundClick = true;
-				}
+			// Copy it for easy operation
+			Button button = (Button) buttons.get(i);
+			// If in the button's bounds
+			if (mouseX > button.getX() && mouseX < button.getX() + button.getHeight() && mouseY > button.getY()
+					&& mouseY < button.getY() + button.getWidth()) {
+				// Call for the action to be found
+				action.performAction(button.getID());
+				// Let everyone know
+				foundClick = true;
 			}
+		}
 		return foundClick;
 	}
-	
+
 	/**
 	 * Unused but would activate when the mouse is clicked in any way
 	 */

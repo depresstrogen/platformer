@@ -9,7 +9,7 @@ import javax.swing.JFrame;
  * track? no one thats what i thought)
  * 
  * @author Riley Power
- * @version April 19 2021
+ * @version April 26 2021
  */
 public class KeebHandler {
 
@@ -65,9 +65,15 @@ public class KeebHandler {
 		return keyboard[key];
 	}// getKey
 	
+	/**
+	 * Forcibly set a key to a value
+	 * 
+	 * @param key The key to set
+	 * @param value The value to set the key to
+	 */
 	public void setKey (int key, boolean value) {
 		keyboard[key] = value;
-	}
+	}// setKey
 
 	/**
 	 * Prints whenever a key is held down

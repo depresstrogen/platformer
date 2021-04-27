@@ -4,7 +4,7 @@ import java.awt.Color;
 /**
  * The class for all text to be displayed on screen
  * 
- * @version January 14, 2021
+ * @version April 26, 2021
  * @author Riley Power
  *
  */

@@ -4,7 +4,7 @@ package src;
  * Main class, Literally just runs the screen class, nothing else
  * 
  * @author Riley Power
- * @version April 19 2021
+ * @version April 26 2021
  */
 public class Main {
 	public static void main(String[] args) {

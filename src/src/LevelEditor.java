@@ -38,7 +38,7 @@ public class LevelEditor {
 			// No Cursor
 		}
 		Block block = new Block();
-		blockList = block.getBlockList();
+		blockList = BlockTypes.blockList;
 		currentItem = blockList[mouseWheelPos];
 		final int KEY_CTRL = 17;
 		final int KEY_SHIFT = 16;

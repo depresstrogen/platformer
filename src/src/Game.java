@@ -15,7 +15,7 @@ import javax.swing.JFrame;
  * + Z = Undo L = Save/Load T = Toggle GUI Shift = Delete R = Rotate
  * 
  * @author Riley Power
- * @version April 19 2021
+ * @version April 26 2021
  */
 public class Game {
 	// IO Objects
@@ -80,7 +80,6 @@ public class Game {
 		updatePlayer();
 		while (true) {
 			// Main game actions
-			//collisionCheck();
 			keebActions();
 			lvledit.levelEditor();
 			scrollCheck();
@@ -88,13 +87,11 @@ public class Game {
 			collisionCheck();
 			updatePlayer();
 			screen.repaint();
+
 			while (nextFrame > System.currentTimeMillis()) {
 				if (paused) {
 					nextFrame = System.currentTimeMillis() + (1000 / fps);
 				}
-				
-				
-				
 			}
 
 			// Set next frame time
@@ -215,6 +212,7 @@ public class Game {
 		ArrayList<ScreenElement> blocks = screen.getAllOfType("block");
 		boolean onBlock = false;
 		for (int i = 0; i < blocks.size(); i++) {
+
 			boolean up = false;
 			boolean down = false;
 			boolean left = false;
@@ -224,15 +222,13 @@ public class Game {
 			// If in the block's width
 			if (block.getY() - BLOCK_WIDTH < playerY && block.getY() + BLOCK_WIDTH > playerY
 					&& block.getX() - BLOCK_WIDTH < playerX && block.getX() + BLOCK_WIDTH > playerX) {
-				blocksCollided ++;
+				blocksCollided++;
 				// Update the position to right outside the block's width
 				// Top (Gets priority as it can cancel actions)
 				if (block.getY() - BLOCK_WIDTH < playerY && block.getY() - (BLOCK_WIDTH / 2) > playerY) {
-
 					up = true;
-
 				}
-				// Bottom (Stops Velocity)
+				// Bottom
 				if (block.getY() + BLOCK_WIDTH > playerY && block.getY() + (BLOCK_WIDTH / 2) < playerY) {
 					down = true;
 				}
@@ -244,57 +240,60 @@ public class Game {
 				if (block.getX() + BLOCK_WIDTH > playerX && block.getX() + (BLOCK_WIDTH / 2) < playerX) {
 					right = true;
 				}
-				
-				
-				
+
 				if (up) {
-
-					// if on edge of block dont do that
-					if (block.getX() - playerX == 288 - 261) {
-
-					} else if (block.getX() - playerX == 256 - 283) {
-
+					// if on edge of block don't do that
+					if (block.getX() - playerX == 27) {
+					} else if (block.getX() - playerX == -27) {
 					} else {
+						// Snap player to top
 						playerY = block.getY() - (BLOCK_WIDTH - 1);
+						// Cancel Downward Speed
 						if (velocity > 0) {
 							velocity = 0;
 						}
+						// Cancel Jump
 						inJump = false;
 						onBlock = true;
 					}
-
 				} else if (down) {
+					// If on edge of block, don't
 					if (block.getX() - playerX == 288 - 261) {
 
 					} else if (block.getX() - playerX == 256 - 283) {
 
 					} else {
+						// Snap to bottom
 						playerY = block.getY() + BLOCK_WIDTH;
+						// Cancel Upward Speed
 						if (velocity < 0) {
 							velocity = 0;
 						}
 					}
 				} else if (left) {
+					// Snap to left
 					playerX = block.getX() - BLOCK_WIDTH;
 
 				} else if (right) {
+					// Snap to right
 					playerX = block.getX() + BLOCK_WIDTH;
 				}
 
-				if(!block.canKill()) 
+				// You're on a safe block so you can't die
+				if (!block.canKill())
 					die = false;
-				}
-				
-				
 			}
-			// This gives the newest block placed collision priority
-			this.onBlock = onBlock;
-			
-			if(die && blocksCollided > 0) {
-				die();
-			}
-			
-		
+
+		}
+
+		// This gives the newest block placed collision priority
+		this.onBlock = onBlock;
+
+		// Die Bitch
+		if (die && blocksCollided > 0) {
+			die();
+		}
+
 	}// collisionCheck
 
 	/**
@@ -323,14 +322,26 @@ public class Game {
 		return scroll;
 	}// getScroll
 
+	/**
+	 * Returns the flag associated with the string given
+	 * 
+	 * @param flag The string with the flag to look for
+	 * @return The state of the requested flag;
+	 */
 	public boolean getFlag(String flag) {
 		if (flag.equals("grid")) {
 			return grid;
 		}
 
 		return false;
-	}
+	}// getFlag
 
+	/**
+	 * Allows a flag to be set from another object
+	 * 
+	 * @param flag The flag to edit
+	 * @param val  The value to set the flag to
+	 */
 	public void setFlag(String flag, boolean val) {
 		if (flag.equals("paused")) {
 			paused = val;
@@ -338,14 +349,17 @@ public class Game {
 		if (flag.equals("grid")) {
 			grid = val;
 		}
-	}
+	}// setFlag
 
+	/**
+	 * Returns the player to the spawned state
+	 */
 	public void die() {
 		playerX = 200;
 		playerY = 0;
 		scroll = 0;
-	}
-	
+	}// die
+
 	// Medal System?
 	// World Map?
 }
