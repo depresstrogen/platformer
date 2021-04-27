@@ -12,7 +12,7 @@ import javax.swing.JFrame;
  * Gravity - Collision - Level Editor
  * 
  * CONTROLS WASD = Movement SPACE = Jump G = Toggle Grid CTRL = Paint Brush CTRL
- * + Z = Undo L = Save/Load T = Toggle GUI
+ * + Z = Undo L = Save/Load T = Toggle GUI Shift = Delete R = Rotate
  * 
  * @author Riley Power
  * @version April 19 2021

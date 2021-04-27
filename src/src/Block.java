@@ -15,6 +15,9 @@ public class Block extends ScreenElement {
 	private int blockCode;
 	private int height;
 	private int width;
+	
+	private int rotation;
+	
 	private String[] blockList = BlockTypes.blockList;
 
 	public Block() {
@@ -52,6 +55,7 @@ public class Block extends ScreenElement {
 		}
 		height = 32;
 		width = 32;
+		rotation = 0;
 	}// Block
 
 	public Block(int x, int y, String id, String type, boolean canKill, int height, int width) {
@@ -76,6 +80,7 @@ public class Block extends ScreenElement {
 		}
 		this.height = height;
 		this.width = width;
+		rotation = 0;
 	}// Block
 
 	/**
@@ -110,5 +115,14 @@ public class Block extends ScreenElement {
 	public int getHeight() {
 		return height;
 	}
+	
+	public int getRotation() {
+		return rotation;
+	}
+	
+	public void setRotation(int rotation) {
+		this.rotation = rotation;
+	}
+	
 	
 }// Block

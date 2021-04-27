@@ -17,6 +17,8 @@ public class LevelEditor {
 	private int scroll;
 	private boolean undo = false;
 
+	public int rotation = 0;
+	
 	private boolean screenCleaned = true;
 	
 	private String[] blockList = BlockTypes.blockList;
@@ -49,6 +51,14 @@ public class LevelEditor {
 			undo = false;
 		}
 
+		if(keeb.getKey('R')) {
+			rotation += 90;
+			if(rotation >= 360) {
+				rotation -= 360;
+			}
+			System.out.print("roatation" + rotation);
+		} keeb.setKey('R', false);
+		
 		if (true) {
 			int wheelCap = blockList.length - 1;
 			if (mouse.getMouseWheel() == 'U') {
@@ -95,9 +105,14 @@ public class LevelEditor {
 		}
 
 		boolean canKill = false;
-		if (currentItem.equals("lavatop")) {
-			canKill = true;
+		String[] lethalBlocks = BlockTypes.lethalBlocks;
+		for(int i = 0; i < lethalBlocks.length; i++) {
+			if (currentItem.equals(lethalBlocks[i])) {
+				canKill = true;
+				i = lethalBlocks.length;
+			}
 		}
+		
 
 		// New block is offset to start at the top left of the mouse
 		Block block = new Block((int) mouse.getX() + scroll, (int) mouse.getY(), "MouseAdded " + currentStroke,
@@ -107,6 +122,7 @@ public class LevelEditor {
 			block = new Block(((int) (mouse.getX() + scroll) >> 5) << 5, ((int) mouse.getY() >> 5) << 5,
 					"MouseAdded " + currentStroke + " " + currentBlock, currentItem, canKill);
 		}
+		block.setRotation(rotation);
 		currentBlock ++;
 		System.out.print(currentBlock);
 		screenCleaned = false;
@@ -130,7 +146,7 @@ public class LevelEditor {
 				block = new Block((int) mouse.getX() + scroll >> 5 << 5, (int) mouse.getY() >> 5 << 5, "cursor",
 						currentItem, false);
 			}
-
+			block.setRotation(rotation);
 			screen.add(block);
 
 		}

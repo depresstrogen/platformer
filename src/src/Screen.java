@@ -54,6 +54,7 @@ public class Screen extends JPanel {
 
 	private int accFPS = 0;
 	private long lastFPS = System.currentTimeMillis();
+
 	/**
 	 * Constructs the jFrame, mouse listener and key listener
 	 * 
@@ -123,6 +124,15 @@ public class Screen extends JPanel {
 		super.paintComponent(g);
 		Graphics2D g2d;
 
+		Image blockTable[][] = new Image[blockPics.length][4];
+		
+		for(int i = 0; i < blockPics.length; i++) {
+			blockTable[i][0] = blockPics[i];
+			blockTable[i][1] = ImageTools.rotateImage(blockTable[i][0], 90);
+			blockTable[i][2] = ImageTools.rotateImage(blockTable[i][0], 180);
+			blockTable[i][3] = ImageTools.rotateImage(blockTable[i][0], 270);
+		}
+		
 		int scroll = game.getScroll();
 
 		BufferedImage screenImg = new BufferedImage(BASEX, BASEY, BufferedImage.TYPE_INT_RGB);
@@ -153,9 +163,17 @@ public class Screen extends JPanel {
 			if (element instanceof Block) {
 				if (element.getX() < scroll - 30 || element.getX() > scroll + 1280) {
 				} else {
+
 					Block block = (Block) element;
-					g2d.drawImage(blockPics[block.getBlockCode()], (int) ((block.getX() - scroll)),
-							(int) (block.getY()), null);
+					Image image;
+					if (block.getRotation() == 0) {
+						image = blockTable[block.getBlockCode()][0];
+
+					} else {
+						image = blockTable[block.getBlockCode()][block.getRotation() / 90];
+					}
+
+					g2d.drawImage(image, (int) ((block.getX() - scroll)), (int) (block.getY()), null);
 				}
 			} else if (element instanceof Player) {
 
@@ -411,7 +429,7 @@ public class Screen extends JPanel {
 			blockPics[i] = image;
 		}
 	}
-	
+
 	public Image[] getBlockPics() {
 		return blockPics;
 	}
@@ -440,4 +458,5 @@ public class Screen extends JPanel {
 		}
 
 	}
+
 }// Screen
