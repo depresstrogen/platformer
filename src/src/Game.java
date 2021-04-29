@@ -77,6 +77,11 @@ public class Game {
 			screen.add(block);
 		}
 
+		LevelInfo ele = new LevelInfo();
+		ele.setSpawnX(0);
+		ele.setSpawnY(0);
+		screen.add(ele);
+		
 		updatePlayer();
 		while (true) {
 			// Main game actions
@@ -84,6 +89,7 @@ public class Game {
 			lvledit.levelEditor();
 			scrollCheck();
 			gravity();
+			updateEnemies();
 			collisionCheck();
 			updatePlayer();
 			screen.repaint();
@@ -164,6 +170,17 @@ public class Game {
 	 */
 	public void loadLevel(String dir) {
 		screen.loadElements(dir);
+		try {
+		LevelInfo ele = (LevelInfo) screen.getScreenElement("lvlinfo");
+		playerX = ele.getSpawnX();
+		playerY = ele.getSpawnY();
+		} catch (Exception e) {
+			LevelInfo ele = new LevelInfo();
+			ele.setSpawnX(0);
+			ele.setSpawnY(0);
+			screen.add(ele);
+		}
+		
 	}// loadLevel
 
 	/**
@@ -286,6 +303,16 @@ public class Game {
 
 		}
 
+		ArrayList<ScreenElement> enemies = screen.getAllOfType("enemy");
+		
+		for (int i = 0; i < enemies.size(); i++) {
+			Enemy enemy = (Enemy) enemies.get(i);
+			if (enemy.getY() - BLOCK_WIDTH < playerY && enemy.getY() + BLOCK_WIDTH > playerY
+					&& enemy.getX() - BLOCK_WIDTH < playerX && enemy.getX() + BLOCK_WIDTH > playerX) {
+				die();
+			}
+		}
+		
 		// This gives the newest block placed collision priority
 		this.onBlock = onBlock;
 
@@ -355,11 +382,22 @@ public class Game {
 	 * Returns the player to the spawned state
 	 */
 	public void die() {
-		playerX = 200;
-		playerY = 0;
+		LevelInfo info = (LevelInfo) screen.getScreenElement("lvlinfo");
+		playerX = info.getSpawnX();
+		playerY = info.getSpawnY();
 		scroll = 0;
 	}// die
 
+	public void updateEnemies() {
+		ArrayList<ScreenElement> enemies = screen.getAllOfType("enemy");
+		for(int i = 0; i < enemies.size(); i++) {
+			if (enemies.get(i) instanceof FireHopper) {
+				FireHopper hop = (FireHopper) enemies.get(i);
+				hop.update();
+			}
+		}
+	}
+	
 	// Medal System?
 	// World Map?
 }

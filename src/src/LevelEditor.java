@@ -18,10 +18,12 @@ public class LevelEditor {
 	private boolean undo = false;
 
 	public int rotation = 0;
-	
+
 	private boolean screenCleaned = true;
-	
+
 	private String[] blockList = BlockTypes.blockList;
+	private String[] enemyList = BlockTypes.enemyList;
+	
 	private String currentItem = blockList[mouseWheelPos];
 
 	public LevelEditor(Game game, Screen screen, MouseHandler mouse, KeebHandler keeb) {
@@ -39,7 +41,6 @@ public class LevelEditor {
 		}
 		Block block = new Block();
 		blockList = BlockTypes.blockList;
-		currentItem = blockList[mouseWheelPos];
 		final int KEY_CTRL = 17;
 		final int KEY_SHIFT = 16;
 		scroll = game.getScroll();
@@ -51,16 +52,17 @@ public class LevelEditor {
 			undo = false;
 		}
 
-		if(keeb.getKey('R')) {
+		if (keeb.getKey('R')) {
 			rotation += 90;
-			if(rotation >= 360) {
+			if (rotation >= 360) {
 				rotation -= 360;
 			}
 			System.out.print("roatation" + rotation);
-		} keeb.setKey('R', false);
-		
+		}
+		keeb.setKey('R', false);
+
 		if (true) {
-			int wheelCap = blockList.length - 1;
+			int wheelCap = blockList.length +  - 1;
 			if (mouse.getMouseWheel() == 'U') {
 				mouseWheelPos--;
 				System.out.print("sc");
@@ -72,12 +74,23 @@ public class LevelEditor {
 			}
 
 			if (mouseWheelPos < 0) {
-				mouseWheelPos = wheelCap;
+				mouseWheelPos = wheelCap + 1;
 			}
-			if (mouseWheelPos > wheelCap) {
+			if (mouseWheelPos > wheelCap + 1) {
 				mouseWheelPos = 0;
 			}
-			currentItem = blockList[mouseWheelPos];
+			//Block
+			if(mouseWheelPos <  blockList.length +  - 1) {
+				currentItem = blockList[mouseWheelPos];
+			} else if (mouseWheelPos <  wheelCap + 1) {
+				//enemy
+				currentItem = enemyList[mouseWheelPos - blockList.length + 1];
+			} else if (mouseWheelPos == wheelCap + 1){
+				currentItem = "info";
+			} else {
+				currentItem = blockList[mouseWheelPos];
+			}
+			
 		}
 
 		if (mouse.isMousePressed() && mouse.getMouseButton() == 'L' && keeb.getKey(KEY_SHIFT)) {
@@ -106,31 +119,53 @@ public class LevelEditor {
 
 		boolean canKill = false;
 		String[] lethalBlocks = BlockTypes.lethalBlocks;
-		for(int i = 0; i < lethalBlocks.length; i++) {
-			if (currentItem.equals(lethalBlocks[i])) {
-				canKill = true;
-				i = lethalBlocks.length;
+		if (mouseWheelPos < blockList.length - 1) {
+			for (int i = 0; i < lethalBlocks.length; i++) {
+				if (currentItem.equals(lethalBlocks[i])) {
+					canKill = true;
+					i = lethalBlocks.length;
+				}
 			}
-		}
-		
 
-		// New block is offset to start at the top left of the mouse
-		Block block = new Block((int) mouse.getX() + scroll, (int) mouse.getY(), "MouseAdded " + currentStroke,
-				currentItem, canKill);
+			// New block is offset to start at the top left of the mouse
+			Block block = new Block((int) mouse.getX() + scroll, (int) mouse.getY(), "MouseAdded " + currentStroke,
+					currentItem, canKill);
 
-		if (game.getFlag("grid")) {
-			block = new Block(((int) (mouse.getX() + scroll) >> 5) << 5, ((int) mouse.getY() >> 5) << 5,
-					"MouseAdded " + currentStroke + " " + currentBlock, currentItem, canKill);
+			if (game.getFlag("grid")) {
+				block = new Block(((int) (mouse.getX() + scroll) >> 5) << 5, ((int) mouse.getY() >> 5) << 5,
+						"MouseAdded " + currentStroke + " " + currentBlock, currentItem, canKill);
+			}
+			block.setRotation(rotation);
+			currentBlock++;
+			System.out.print(currentBlock);
+			screenCleaned = false;
+			screen.add(block);
+		} else if (mouseWheelPos < blockList.length + enemyList.length - 1) {
+			FireHopper hop = new FireHopper((int) mouse.getX() + scroll, (int) mouse.getY(), "MouseAdded " + currentStroke);
+			if (game.getFlag("grid")) {
+				hop = new FireHopper(((int) (mouse.getX() + scroll) >> 5) << 5, ((int) mouse.getY() >> 5) << 5,
+						"MouseAdded " + currentStroke + " " + currentBlock);
+			}
+			currentBlock++;
+			screenCleaned = false;
+			screen.add(hop);
 		}
-		block.setRotation(rotation);
-		currentBlock ++;
-		System.out.print(currentBlock);
-		screenCleaned = false;
-		screen.add(block);
+		else if (currentItem.equals("info")) {
+			LevelInfo info = (LevelInfo) screen.getScreenElement("lvlinfo");
+			screen.removeID("lvlinfo");
+			if (game.getFlag("grid")) {
+				info.setSpawnX(mouse.getX() + scroll >> 5 << 5);
+				info.setSpawnY(mouse.getY() >> 5 << 5);
+			} else {
+				info.setSpawnX(mouse.getX() + scroll);
+				info.setSpawnY(mouse.getY());
+			}
+			screen.add(info);
+		}
 		// If the CTRL key isn't pressed, release the mouse button
 		if (!keeb.getKey(KEY_CTRL)) {
 			mouse.removePressedFlag();
-			
+
 		}
 		// Shows the mouse button is still held
 		lastStrokeFlag = true;
@@ -138,7 +173,7 @@ public class LevelEditor {
 	}
 
 	public void cursor() {
-		if (mouse.getMouseButton() == 'R' && mouse.isMousePressed()) {
+		if (mouseWheelPos < blockList.length - 1) {
 			// New block is offset to start at the top left of the mouse
 			Block block = new Block((int) (mouse.getX() + scroll), (int) mouse.getY(), "cursor", currentItem, false);
 
@@ -149,7 +184,32 @@ public class LevelEditor {
 			block.setRotation(rotation);
 			screen.add(block);
 
+		} else if (mouseWheelPos < blockList.length + enemyList.length - 1) {
+			FireHopper hop = new FireHopper((int) mouse.getX() + scroll, (int) mouse.getY() + 19, "cursor");
+			if (game.getFlag("grid")) {
+				hop = new FireHopper((int) mouse.getX() + scroll >> 5 << 5, (int) (mouse.getY() >> 5 << 5 ) + 19, "cursor");
+			}
+			screen.add(hop);
 		}
+		else if (currentItem.equals("info")) {
+		
+			try {
+				screen.removeID("cursor");
+			} catch (Exception e) {
+				
+			}
+			LevelInfo info = new LevelInfo();
+			info.setID("cursor");
+			if (game.getFlag("grid")) {
+				info.setSpawnX(mouse.getX() + scroll >> 5 << 5);
+				info.setSpawnY(mouse.getY() >> 5 << 5);
+			} else {
+				info.setSpawnX(mouse.getX() + scroll);
+				info.setSpawnY(mouse.getY());
+			}
+			screen.add(info);
+		}
+		
 	}
 
 	public void removeBlocks() {
@@ -161,15 +221,14 @@ public class LevelEditor {
 			if (mouse.getX() + scroll >= block.getX() && mouse.getX() + scroll <= block.getX() + block.getWidth()
 					&& mouse.getY() >= block.getY() && mouse.getY() <= block.getY() + block.getHeight()) {
 				System.out.println("delete");
-				
-				if(!screenCleaned) {
+
+				if (!screenCleaned) {
 					screen.screenClean();
 					screenCleaned = true;
 				}
-				
+
 				screen.removeID(block.getID());
-				
-				
+
 				i = -1;
 			}
 		}

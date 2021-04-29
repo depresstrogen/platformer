@@ -70,7 +70,7 @@ public class Screen extends JPanel {
 		// Start JFrame
 		frameSetup();
 		runGame();
-
+		
 		// lol while true go brrr
 		while (true) {
 			ratio();
@@ -88,7 +88,7 @@ public class Screen extends JPanel {
 
 			nextFrame = System.currentTimeMillis() + (1000 / fps);
 		}
-
+		
 	}// Screen
 
 	/**
@@ -219,6 +219,21 @@ public class Screen extends JPanel {
 				g2d.setFont(new Font(text.getFont(), Font.PLAIN, text.getFontSize()));
 				//Draw standalone text
 				g2d.drawString(text.getText(), text.getX(), text.getY());
+			} else if (elements.get(i) instanceof LevelInfo) {
+				LevelInfo info = (LevelInfo) elements.get(i);
+				g2d.setColor(Color.CYAN);
+				g2d.fillRect(info.getSpawnX() - scroll, info.getSpawnY(), 32, 32);
+				g2d.setFont(new Font("Helvetica", Font.PLAIN, 10));
+				g2d.setColor(Color.BLACK);
+				//Draw standalone text
+				g2d.drawString("Spawn", info.getSpawnX() - scroll, info.getSpawnY() + 18);
+			} else if (elements.get(i) instanceof FireHopper) {
+				FireHopper hop = (FireHopper) elements.get(i);
+				Image img = Toolkit.getDefaultToolkit().getImage("img/enemy/firehopper.png");
+				// Draw your bitch
+				g2d.drawImage(img, (int) ((hop.getX() - scroll)), (int) (hop.getY()),
+						(int) (img.getHeight(this) ),
+						(int) (img.getWidth(this) ), null);
 			}
 
 		}
@@ -308,7 +323,11 @@ public class Screen extends JPanel {
 					typeArr.add(elements.get(i));
 				}
 			}
-
+			if (elements.get(i) instanceof Enemy) {
+				if (type.equals("enemy")) {
+					typeArr.add(elements.get(i));
+				}
+			}
 		}
 		return typeArr;
 	}// getAllOfType
@@ -466,17 +485,25 @@ public class Screen extends JPanel {
 	 */
 	public void screenClean() {
 		int n = 0;
+		
 		System.out.println(elements.size());
 		// Every item, searching through each item infront of it
 		for (int i = 0; i < elements.size(); i++) {
 			for (int j = i + 1; j < elements.size(); j++) {
 				//If they have the same coordinates
 				if (elements.get(i).getX() == elements.get(j).getX()
-						&& elements.get(i).getY() == elements.get(j).getY()) {
-					//Yeet that bitch
-					elements.remove(i);
-					//Deletion count
-					n++;
+						&& elements.get(i).getY() == elements.get(j).getY() && elements.get(i) instanceof Block  && elements.get(j) instanceof Block) {
+					Block a = (Block) elements.get(i);
+					Block b = (Block) elements.get(j);
+					
+					if(a.getType().equals(b.getType())) {
+						//Yeet that bitch
+						elements.remove(i);
+						//Deletion count
+						n++;
+					}
+					
+					
 				}
 			}
 		}

@@ -28,6 +28,9 @@ public class MouseHandler extends JPanel implements MouseListener, MouseWheelLis
 	// The current mouse button pressed
 	private char mouseButton = ' ';
 
+	private boolean leftButton = false;
+	private boolean rightButton = false;
+	private boolean middleButton = false;
 	// IO objects
 	private Frame frame;
 	private Screen screen;
@@ -144,8 +147,10 @@ public class MouseHandler extends JPanel implements MouseListener, MouseWheelLis
 	 */
 	private char determineMouseButton(MouseEvent e) {
 		// Default to left
-		char mb = 'L';
-		if (SwingUtilities.isMiddleMouseButton(e)) {
+		char mb = ' ';
+		if (SwingUtilities.isLeftMouseButton(e)) {
+			mb = 'L';
+		} else if (SwingUtilities.isMiddleMouseButton(e)) {
 			mb = 'M';
 		} else if (SwingUtilities.isRightMouseButton(e)) {
 			mb = 'R';

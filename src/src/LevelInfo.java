@@ -10,8 +10,8 @@ public class LevelInfo extends ScreenElement {
 	// Current stroke so CTRL Z works after a load
 	private int currentStroke = 0;
 	// The Player's starting coordinates
-	public int playerStartX = 0;
-	public int playerStartY = 0;
+	private int playerStartX = 0;
+	private int playerStartY = 0;
 
 	/**
 	 * LevelInfo constructor
@@ -38,4 +38,22 @@ public class LevelInfo extends ScreenElement {
 	public int getCurrentStroke() {
 		return currentStroke;
 	}// getCurrentStroke
+	
+	
+	public int getSpawnX() {
+		return playerStartX;
+	}
+	
+	public int getSpawnY() {
+		return playerStartY;
+	}
+	
+	public void setSpawnX(int coord) {
+		playerStartX = coord;
+	}
+	
+	public void setSpawnY(int coord) {
+		playerStartY = coord;
+	}
+
 }// LevelInfo
