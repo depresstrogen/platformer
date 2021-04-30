@@ -12,7 +12,7 @@ public class BlockTypes {
 			"lavatop", "lavabase", "lavacorner", "gay" };
 
 	public static final String[] enemyList = { "firehopper" };
-
+	public static final String[] enemyImages = {"img/enemy/firehopper.png"};
 	// The list of all the blocks that can harm the player
 	public static final String[] lethalBlocks = { "lavatop", "lavacorner" };
 }// BlockTypes

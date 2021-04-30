@@ -25,7 +25,7 @@ public class Screen extends JPanel {
 	private ArrayList<ScreenElement> elements = new ArrayList<ScreenElement>();
 
 	private Image blockPics[] = new Image[BlockTypes.blockList.length];
-
+	private Image enemyPics[] = new Image[BlockTypes.enemyList.length];
 	// The game runs at 720p then scales
 	private final int BASEX = 1280;
 	private final int BASEY = 720;
@@ -55,6 +55,8 @@ public class Screen extends JPanel {
 	// FPS Counter
 	private int accFPS = 0;
 	private long lastFPS = System.currentTimeMillis();
+	
+	public BufferedImage selectedItem = new BufferedImage(1,1,BufferedImage.TYPE_INT_ARGB);
 
 	/**
 	 * Constructs the jFrame, mouse listener and key listener
@@ -135,7 +137,17 @@ public class Screen extends JPanel {
 			blockTable[i][2] = ImageTools.rotateImage(blockTable[i][0], 180);
 			blockTable[i][3] = ImageTools.rotateImage(blockTable[i][0], 270);
 		}
+		
+		Image enemyTable[][] = new Image[enemyPics.length][4];
 
+		
+		for (int i = 0; i < enemyPics.length; i++) {
+			enemyTable[i][0] = enemyPics[i];
+			enemyTable[i][1] = ImageTools.rotateImage(enemyTable[i][0], 90);
+			enemyTable[i][2] = ImageTools.rotateImage(enemyTable[i][0], 180);
+			enemyTable[i][3] = ImageTools.rotateImage(enemyTable[i][0], 270);
+		}
+		
 		// Set the block and player offset
 		int scroll = game.getScroll();
 
@@ -229,15 +241,19 @@ public class Screen extends JPanel {
 				g2d.drawString("Spawn", info.getSpawnX() - scroll, info.getSpawnY() + 18);
 			} else if (elements.get(i) instanceof FireHopper) {
 				FireHopper hop = (FireHopper) elements.get(i);
-				Image img = Toolkit.getDefaultToolkit().getImage("img/enemy/firehopper.png");
+				Image img = enemyTable[0][0];
+				if (hop.getState().equals("down")) {
+					img = enemyTable[0][2];
+				}
 				// Draw your bitch
-				g2d.drawImage(img, (int) ((hop.getX() - scroll)), (int) (hop.getY()),
+				g2d.drawImage((Image) img, (int) ((hop.getX() - scroll)), (int) (hop.getY()),
 						(int) (img.getHeight(this) ),
 						(int) (img.getWidth(this) ), null);
 			}
-
+			
+			
 		}
-		
+		gooey.selectedItem(g2d);
 		// If its being scaled draw the buffered image to the screen now
 		if (ratioX == 1 && ratioY == 1) {
 
@@ -468,6 +484,13 @@ public class Screen extends JPanel {
 			Image image = Toolkit.getDefaultToolkit().getImage(block.getImage());
 			//Slap that shit in
 			blockPics[i] = image;
+		}
+		String[] enemyList = BlockTypes.enemyList;
+		for (int i = 0; i < enemyList.length; i++) {
+			//Load block image
+			Image image = Toolkit.getDefaultToolkit().getImage(BlockTypes.enemyImages[i]);
+			//Slap that shit in
+			enemyPics[i] = image;
 		}
 	}//loadBlocks
 

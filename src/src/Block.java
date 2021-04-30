@@ -105,6 +105,15 @@ public class Block extends ScreenElement {
 	 * 
 	 * @return imageDir
 	 */
+	public void setImage(String image) {
+		imageDir = image;
+	}// getImage
+	
+	/**
+	 * Returns the directory of the image this block corresponds to
+	 * 
+	 * @return imageDir
+	 */
 	public String getImage() {
 		return imageDir;
 	}// getImage

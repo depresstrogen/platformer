@@ -65,7 +65,7 @@ public class Game {
 		this.keeb = keeb;
 		this.mouse = mouse;
 		this.gooey = gooey;
-		lvledit = new LevelEditor(this, screen, mouse, keeb);
+		lvledit = new LevelEditor(this, screen, mouse, keeb, gooey);
 	}// Game
 
 	/**
@@ -228,6 +228,9 @@ public class Game {
 		int blocksCollided = 0;
 		ArrayList<ScreenElement> blocks = screen.getAllOfType("block");
 		boolean onBlock = false;
+		
+		int oldVelocity = velocity;
+		
 		for (int i = 0; i < blocks.size(); i++) {
 
 			boolean up = false;
@@ -278,8 +281,12 @@ public class Game {
 					if (block.getX() - playerX == 288 - 261) {
 
 					} else if (block.getX() - playerX == 256 - 283) {
-
-					} else {
+					} else if (playerX - block.getX()  < 4 && left) {
+						//Autocorrect for 1 block gaps
+						playerX = block.getX() - BLOCK_WIDTH;
+					}
+					else {
+					
 						// Snap to bottom
 						playerY = block.getY() + BLOCK_WIDTH;
 						// Cancel Upward Speed
@@ -385,7 +392,7 @@ public class Game {
 		LevelInfo info = (LevelInfo) screen.getScreenElement("lvlinfo");
 		playerX = info.getSpawnX();
 		playerY = info.getSpawnY();
-		scroll = 0;
+		scroll = playerX - 200;
 	}// die
 
 	public void updateEnemies() {
