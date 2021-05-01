@@ -344,6 +344,11 @@ public class Screen extends JPanel {
 					typeArr.add(elements.get(i));
 				}
 			}
+			if (elements.get(i) instanceof MovingBlock) {
+				if (type.equals("moving")) {
+					typeArr.add(elements.get(i));
+				}
+			}
 		}
 		return typeArr;
 	}// getAllOfType

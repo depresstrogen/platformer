@@ -81,7 +81,7 @@ public class Game {
 		ele.setSpawnX(0);
 		ele.setSpawnY(0);
 		screen.add(ele);
-		
+
 		updatePlayer();
 		while (true) {
 			// Main game actions
@@ -171,16 +171,16 @@ public class Game {
 	public void loadLevel(String dir) {
 		screen.loadElements(dir);
 		try {
-		LevelInfo ele = (LevelInfo) screen.getScreenElement("lvlinfo");
-		playerX = ele.getSpawnX();
-		playerY = ele.getSpawnY();
+			LevelInfo ele = (LevelInfo) screen.getScreenElement("lvlinfo");
+			playerX = ele.getSpawnX();
+			playerY = ele.getSpawnY();
 		} catch (Exception e) {
 			LevelInfo ele = new LevelInfo();
 			ele.setSpawnX(0);
 			ele.setSpawnY(0);
 			screen.add(ele);
 		}
-		
+
 	}// loadLevel
 
 	/**
@@ -228,9 +228,9 @@ public class Game {
 		int blocksCollided = 0;
 		ArrayList<ScreenElement> blocks = screen.getAllOfType("block");
 		boolean onBlock = false;
-		
+
 		int oldVelocity = velocity;
-		
+
 		for (int i = 0; i < blocks.size(); i++) {
 
 			boolean up = false;
@@ -276,17 +276,23 @@ public class Game {
 						inJump = false;
 						onBlock = true;
 					}
+					
+					if (block instanceof MovingBlock) {
+						MovingBlock blonk = (MovingBlock) block;
+						playerX += blonk.getSpeed();
+					}
+					
+					
 				} else if (down) {
 					// If on edge of block, don't
 					if (block.getX() - playerX == 288 - 261) {
 
 					} else if (block.getX() - playerX == 256 - 283) {
-					} else if (playerX - block.getX()  < 4 && left) {
-						//Autocorrect for 1 block gaps
+					} else if (playerX - block.getX() < 4 && left) {
+						// Autocorrect for 1 block gaps
 						playerX = block.getX() - BLOCK_WIDTH;
-					}
-					else {
-					
+					} else {
+
 						// Snap to bottom
 						playerY = block.getY() + BLOCK_WIDTH;
 						// Cancel Upward Speed
@@ -303,6 +309,7 @@ public class Game {
 					playerX = block.getX() + BLOCK_WIDTH;
 				}
 
+				
 				// You're on a safe block so you can't die
 				if (!block.canKill())
 					die = false;
@@ -311,7 +318,7 @@ public class Game {
 		}
 
 		ArrayList<ScreenElement> enemies = screen.getAllOfType("enemy");
-		
+
 		for (int i = 0; i < enemies.size(); i++) {
 			Enemy enemy = (Enemy) enemies.get(i);
 			if (enemy.getY() - BLOCK_WIDTH < playerY && enemy.getY() + BLOCK_WIDTH > playerY
@@ -319,7 +326,7 @@ public class Game {
 				die();
 			}
 		}
-		
+
 		// This gives the newest block placed collision priority
 		this.onBlock = onBlock;
 
@@ -395,16 +402,34 @@ public class Game {
 		scroll = playerX - 200;
 	}// die
 
+	/**
+	 * 
+	 */
 	public void updateEnemies() {
 		ArrayList<ScreenElement> enemies = screen.getAllOfType("enemy");
-		for(int i = 0; i < enemies.size(); i++) {
+		for (int i = 0; i < enemies.size(); i++) {
 			if (enemies.get(i) instanceof FireHopper) {
 				FireHopper hop = (FireHopper) enemies.get(i);
 				hop.update();
 			}
 		}
+
+		ArrayList<ScreenElement> blocks = screen.getAllOfType("block");
+		ArrayList<ScreenElement> blonks = screen.getAllOfType("moving");
+		for (int h = 0; h < blonks.size(); h++) {
+			MovingBlock blonk = (MovingBlock) blonks.get(h);
+			blonk.update();
+			for (int i = 0; i < blocks.size(); i++) {
+				Block block = (Block) blocks.get(i);
+				if(blonk.getX() > block.getX() && blonk.getX() < block.getX() + block.getWidth() && block.getY() == blonk.getY()) {
+					blonk.setSpeed(blonk.getSpeed() * -1);
+				} else if(blonk.getX() + blonk.getWidth() > block.getX() && blonk.getX() + blonk.getWidth()  < block.getX() + block.getWidth() && block.getY() == blonk.getY()) {
+					blonk.setSpeed(blonk.getSpeed() * -1);
+				}
+			}
+		}
 	}
-	
+
 	// Medal System?
 	// World Map?
 }

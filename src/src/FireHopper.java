@@ -16,6 +16,9 @@ public class FireHopper extends Enemy {
 		super(x, y, id);
 		spawnX = x;
 		spawnY = y;
+		
+		
+		
 	}
 	
 	public void update() {

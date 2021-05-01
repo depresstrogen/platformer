@@ -128,20 +128,30 @@ public class LevelEditor {
 					i = lethalBlocks.length;
 				}
 			}
+			if (!keeb.getKey('1')) {
+				// New block is offset to start at the top left of the mouse
+				Block block = new Block((int) mouse.getX() + scroll, (int) mouse.getY(), "MouseAdded " + currentStroke,
+						currentItem, canKill);
 
-			// New block is offset to start at the top left of the mouse
-			Block block = new Block((int) mouse.getX() + scroll, (int) mouse.getY(), "MouseAdded " + currentStroke,
-					currentItem, canKill);
-
-			if (game.getFlag("grid")) {
-				block = new Block(((int) (mouse.getX() + scroll) >> 5) << 5, ((int) mouse.getY() >> 5) << 5,
-						"MouseAdded " + currentStroke + " " + currentBlock, currentItem, canKill);
+				if (game.getFlag("grid")) {
+					block = new Block(((int) (mouse.getX() + scroll) >> 5) << 5, ((int) mouse.getY() >> 5) << 5,
+							"MouseAdded " + currentStroke + " " + currentBlock, currentItem, canKill);
+				}
+				block.setRotation(rotation);
+				screen.add(block);
+			} else {
+				MovingBlock block = new MovingBlock((int) mouse.getX() + scroll, (int) mouse.getY(), "MouseAdded " + currentStroke,
+						currentItem, canKill);
+				if (game.getFlag("grid")) {
+					block = new MovingBlock(((int) (mouse.getX() + scroll) >> 5) << 5, ((int) mouse.getY() >> 5) << 5,
+							"MouseAdded " + currentStroke + " " + currentBlock, currentItem, canKill);
+				}
+				block.setRotation(rotation);
+				screen.add(block);
 			}
-			block.setRotation(rotation);
 			currentBlock++;
 			System.out.print(currentBlock);
 			screenCleaned = false;
-			screen.add(block);
 		} else if (mouseWheelPos < blockList.length + enemyList.length) {
 			FireHopper hop = new FireHopper((int) mouse.getX() + scroll, (int) mouse.getY(),
 					"MouseAdded " + currentStroke);
@@ -254,8 +264,6 @@ public class LevelEditor {
 			}
 		}
 
-
-
 		// If the CTRL key isn't pressed, release the mouse button
 		if (!keeb.getKey(KEY_CTRL)) {
 			mouse.removePressedFlag();
@@ -264,6 +272,7 @@ public class LevelEditor {
 
 	public void selectBlock() {
 		final int KEY_CTRL = 17;
+
 		ArrayList<ScreenElement> blocks = screen.getAllOfType("block");
 		for (int i = blocks.size() - 1; i >= 0; i--) {
 			Block block = (Block) blocks.get(i);
@@ -273,6 +282,7 @@ public class LevelEditor {
 				System.out.println(block.getX() + " " + block.getY());
 			}
 		}
+
 		ArrayList<ScreenElement> enemies = screen.getAllOfType("enemy");
 		for (int i = enemies.size() - 1; i >= 0; i--) {
 			Enemy enemy = (Enemy) enemies.get(i);
@@ -281,25 +291,24 @@ public class LevelEditor {
 				gooey.setSelect(enemy);
 			}
 		}
-		
+
 		Player player = (Player) screen.getScreenElement("Player");
-		
+
 		if (mouse.getX() + scroll >= player.getX() && mouse.getX() + scroll <= player.getX() + 32
 				&& mouse.getY() >= player.getY() && mouse.getY() <= player.getY() + 32) {
 			System.out.println("delete");
 
-
 			gooey.setSelect(player);
-			
+
 		}
-		
+
 		LevelInfo info = (LevelInfo) screen.getScreenElement("lvlinfo");
 		if (mouse.getX() + scroll >= info.getSpawnX() && mouse.getX() + scroll <= info.getSpawnX() + 32
 				&& mouse.getY() >= info.getSpawnY() && mouse.getY() <= info.getSpawnY() + 32) {
 			gooey.setSelect(info);
-			
+
 		}
-		
+
 		mouse.removePressedFlag();
 	}
 
