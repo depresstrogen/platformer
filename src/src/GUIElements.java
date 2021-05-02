@@ -13,7 +13,7 @@ import javax.swing.JFrame;
  * Every command to show GUI elements like buttons on the screen
  * 
  * @author Riley Power
- * @version April 26 2021
+ * @version May 2, 2021
  */
 public class GUIElements {
 	private Font font = new Font("Comic Sans MS", Font.PLAIN, 24);
@@ -53,53 +53,72 @@ public class GUIElements {
 		}
 	}// levelEdit
 
+	/**
+	 * Displays the selected item menu on the screen
+	 * 
+	 * @param g2d the graphics element to draw with
+	 */
 	public void selectedItem(Graphics2D g2d) {
-		
 		try {
+			// Updates selected element from the screen
 			setSelect(screen.getScreenElement(selectedItem.getID()));
 			Image img = Toolkit.getDefaultToolkit().getImage(selectedItem.getImage());
-			
+
+			// Background Block
 			g2d.setColor(Color.BLACK);
 			g2d.drawRect(879, 552, 384, 128);
 			g2d.setColor(Color.LIGHT_GRAY);
 			g2d.fillRect(880, 553, 383, 127);
-			if(selectedItem.getHeight() == 180) {
+			// Rotates Image
+			if (selectedItem.getHeight() == 180) {
 				img = ImageTools.rotateImage(img, 180);
 			}
+			// Block Preview
 			g2d.drawImage(img, 900, 570, 96, 96, null);
 			g2d.setFont(font);
 			g2d.setColor(Color.BLACK);
-			g2d.drawString(selectedItem.getType(), 1020 , 590);
-			if(selectedItem.getWidth() == 3) {
+			g2d.drawString(selectedItem.getType(), 1020, 590);
+			// Level info doesnt have a image so this makes it
+			if (selectedItem.getWidth() == 3) {
 				g2d.setColor(Color.CYAN);
 				g2d.fillRect(900, 570, 96, 96);
 				g2d.setColor(Color.BLACK);
-				g2d.drawString("Spawn X: " + selectedItem.getX(), 1020 , 630);
-				g2d.drawString("Spawn Y: " + selectedItem.getY(), 1020 , 660);
+				// Custom text
+				g2d.drawString("Spawn X: " + selectedItem.getX(), 1020, 630);
+				g2d.drawString("Spawn Y: " + selectedItem.getY(), 1020, 660);
 				g2d.drawString("Spawn", 910, 625);
-				
+
 			} else {
-				g2d.drawString("X: " + selectedItem.getX(), 1020 , 630);
-				g2d.drawString("Y: " + selectedItem.getY(), 1020 , 660);
+				// Prints Coordinates
+				g2d.drawString("X: " + selectedItem.getX(), 1020, 630);
+				g2d.drawString("Y: " + selectedItem.getY(), 1020, 660);
 			}
 		} catch (Exception e) {
-
+			// No selected item
 		}
-	}
+	}// selectedItem
 
+	/**
+	 * Selects element and hands it over to selectedItem
+	 * 
+	 * @param element The screen element to display stats of
+	 */
 	public void setSelect(ScreenElement element) {
-		if(element instanceof Block) {
+		if (element instanceof Block) {
 			selectedItem = (Block) element;
 		}
+		// Everything here takes what is important to display, shoehorns it into a block
+		// object and hands it to selectedItem, width is the type, height is a "secret"
+		// variable *shhhhhh*
 		if (element instanceof FireHopper) {
 			FireHopper enemy = (FireHopper) element;
 			String type = "";
-			String image = "";
-			if(enemy instanceof FireHopper) {
+			if (enemy instanceof FireHopper) {
 				type = "firehopper";
 			}
+			// Hides rotation in block width
 			int secret = 180;
-			if(enemy.getState().equals("up")) {
+			if (enemy.getState().equals("up")) {
 				secret = 0;
 			}
 			Block block = new Block(enemy.getX(), enemy.getY(), enemy.getID(), type, true, secret, 1);
@@ -108,13 +127,7 @@ public class GUIElements {
 		}
 		if (element instanceof Player) {
 			Player player = (Player) element;
-			String type = "";
-			String image = "";
-			int secret = 180;
-			if(player.getState().equals("up")) {
-				secret = 0;
-			}
-			Block block = new Block(player.getX(), player.getY(), player.getID(), "player", true, secret, 2);
+			Block block = new Block(player.getX(), player.getY(), player.getID(), "player", true, 0, 2);
 			block.setImage(player.getImage());
 			selectedItem = block;
 		}
@@ -123,14 +136,6 @@ public class GUIElements {
 			Block block = new Block(info.getSpawnX(), info.getSpawnY(), info.getID(), "level info", true, 0, 3);
 			selectedItem = block;
 		}
-	}
-
-	private boolean getSelectedBlockOn() {
-		return selectedBlockOn;
-	}
-
-	private void toggleSelectedBlock(boolean selectedBlock) {
-		selectedBlockOn = selectedBlock;
-	}
+	}// setSelect
 
 }// GUIElements

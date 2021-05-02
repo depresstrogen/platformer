@@ -13,7 +13,7 @@ import javax.swing.*;
  * Everything to do with drawing the screen, and anything to do with the main
  * window is performed in this class
  * 
- * @version April 19, 2021
+ * @version May 2, 2021
  * @author Riley Power
  *
  */
@@ -530,8 +530,6 @@ public class Screen extends JPanel {
 						//Deletion count
 						n++;
 					}
-					
-					
 				}
 			}
 		}

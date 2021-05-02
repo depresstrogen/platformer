@@ -1,7 +1,11 @@
 package src;
 
 import java.awt.Image;
-
+/**
+ * 
+ * @author Riley
+ * @version May 2 2021
+ */
 public class Enemy extends ScreenElement {
 
 	private int width = 32;

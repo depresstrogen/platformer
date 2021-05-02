@@ -15,7 +15,7 @@ import javax.swing.JFrame;
  * + Z = Undo L = Save/Load T = Toggle GUI Shift = Delete R = Rotate
  * 
  * @author Riley Power
- * @version April 26 2021
+ * @version May 2, 2021
  */
 public class Game {
 	// IO Objects
@@ -38,9 +38,6 @@ public class Game {
 
 	// Screen scroll
 	private int scroll = 0;
-
-	// For level editor, allows for CTRL Z
-	private int currentStroke = 0;
 
 	// Flags
 	private boolean paused = false;
@@ -224,12 +221,11 @@ public class Game {
 	public void collisionCheck() {
 		// Can be changed to the current block's size
 		final int BLOCK_WIDTH = 32;
+		// Flags
+		boolean onBlock = false;
 		boolean die = true;
 		int blocksCollided = 0;
 		ArrayList<ScreenElement> blocks = screen.getAllOfType("block");
-		boolean onBlock = false;
-
-		int oldVelocity = velocity;
 
 		for (int i = 0; i < blocks.size(); i++) {
 
@@ -239,10 +235,11 @@ public class Game {
 			boolean right = false;
 			// Gets current block
 			Block block = (Block) blocks.get(i);
-			// If in the block's width
+			// If backgroud block go cry
 			if (block instanceof BackgroundBlock) {
-				
+
 			}
+			// If in the block's width and height
 			else if (block.getY() - BLOCK_WIDTH < playerY && block.getY() + BLOCK_WIDTH > playerY
 					&& block.getX() - BLOCK_WIDTH < playerX && block.getX() + BLOCK_WIDTH > playerX) {
 				blocksCollided++;
@@ -279,13 +276,12 @@ public class Game {
 						inJump = false;
 						onBlock = true;
 					}
-					
+
 					if (block instanceof MovingBlock) {
 						MovingBlock blonk = (MovingBlock) block;
 						playerX += blonk.getSpeed();
 					}
-					
-					
+
 				} else if (down) {
 					// If on edge of block, don't
 					if (block.getX() - playerX == 288 - 261) {
@@ -312,7 +308,6 @@ public class Game {
 					playerX = block.getX() + BLOCK_WIDTH;
 				}
 
-				
 				// You're on a safe block so you can't die
 				if (!block.canKill())
 					die = false;
@@ -322,6 +317,7 @@ public class Game {
 
 		ArrayList<ScreenElement> enemies = screen.getAllOfType("enemy");
 
+		// Checks for collision with enemies
 		for (int i = 0; i < enemies.size(); i++) {
 			Enemy enemy = (Enemy) enemies.get(i);
 			if (enemy.getY() - BLOCK_WIDTH < playerY && enemy.getY() + BLOCK_WIDTH > playerY
@@ -406,7 +402,7 @@ public class Game {
 	}// die
 
 	/**
-	 * 
+	 * Updates the enemies and moving blocks on screen
 	 */
 	public void updateEnemies() {
 		ArrayList<ScreenElement> enemies = screen.getAllOfType("enemy");
@@ -422,17 +418,21 @@ public class Game {
 		for (int h = 0; h < blonks.size(); h++) {
 			MovingBlock blonk = (MovingBlock) blonks.get(h);
 			blonk.update();
+			// Checks the collision of each moving block
 			for (int i = 0; i < blocks.size(); i++) {
 				Block block = (Block) blocks.get(i);
-				if(blonk.getX() > block.getX() && blonk.getX() < block.getX() + block.getWidth() && block.getY() == blonk.getY()) {
+				if (blonk.getX() > block.getX() && blonk.getX() < block.getX() + block.getWidth()
+						&& block.getY() == blonk.getY()) {
 					blonk.setSpeed(blonk.getSpeed() * -1);
-				} else if(blonk.getX() + blonk.getWidth() > block.getX() && blonk.getX() + blonk.getWidth()  < block.getX() + block.getWidth() && block.getY() == blonk.getY()) {
+				} else if (blonk.getX() + blonk.getWidth() > block.getX()
+						&& blonk.getX() + blonk.getWidth() < block.getX() + block.getWidth()
+						&& block.getY() == blonk.getY()) {
 					blonk.setSpeed(blonk.getSpeed() * -1);
 				}
 			}
 		}
-	}
+	}// updateEnemies
 
 	// Medal System?
 	// World Map?
-}
+}// Game

@@ -4,7 +4,7 @@ package src;
  * Object used to hold information about the current level
  * 
  * @author Riley Power
- * @version April 26 2021
+ * @version May 2, 2021
  */
 public class LevelInfo extends ScreenElement {
 	// Current stroke so CTRL Z works after a load
@@ -38,22 +38,41 @@ public class LevelInfo extends ScreenElement {
 	public int getCurrentStroke() {
 		return currentStroke;
 	}// getCurrentStroke
-	
-	
+
+	/**
+	 * Returns the spawn X coordinate of the player
+	 * 
+	 * @return spawnX
+	 */
 	public int getSpawnX() {
 		return playerStartX;
-	}
-	
+	}// getSpawnX
+
+	/**
+	 * Returns the spawn X coordinate of the player
+	 * 
+	 * @return spawnX
+	 */
 	public int getSpawnY() {
 		return playerStartY;
-	}
-	
+	}// getSpawnY
+
+	/**
+	 * Sets where the player should spawn on the X axis
+	 * 
+	 * @param coord The coordinate to set
+	 */
 	public void setSpawnX(int coord) {
 		playerStartX = coord;
-	}
-	
+	}// setSpawnY
+
+	/*
+	 * Sets where the player should spawn on the X axis
+	 * 
+	 * @param coord The coordinate to set
+	 */
 	public void setSpawnY(int coord) {
 		playerStartY = coord;
-	}
+	}// setSpawnY
 
 }// LevelInfo

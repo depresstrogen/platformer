@@ -6,13 +6,17 @@ import java.io.File;
  * Object that holds everything needed to display and use a block
  * 
  * @author Riley Power
- * @version April 26 2021
+ * @version May 2 2021
  */
 public class Block extends ScreenElement {
+	//Image Directory
 	private String imageDir;
-	private boolean canKill;
+	//The name of the object
 	private String type;
+	//What number in list it is
 	private int blockCode;
+	//If the object should trigger the player to die
+	private boolean canKill;
 	private int height;
 	private int width;
 

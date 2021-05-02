@@ -14,7 +14,7 @@ import javax.swing.SwingUtilities;
  * Gets the state of the mouse and returns it to whatever needs the input
  * 
  * @author Riley Power
- * @version April 26 2021
+ * @version May 2, 2021
  */
 public class MouseHandler extends JPanel implements MouseListener, MouseWheelListener {
 
@@ -27,10 +27,6 @@ public class MouseHandler extends JPanel implements MouseListener, MouseWheelLis
 
 	// The current mouse button pressed
 	private char mouseButton = ' ';
-
-	private boolean leftButton = false;
-	private boolean rightButton = false;
-	private boolean middleButton = false;
 	// IO objects
 	private Frame frame;
 	private Screen screen;
