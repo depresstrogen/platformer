@@ -240,7 +240,10 @@ public class Game {
 			// Gets current block
 			Block block = (Block) blocks.get(i);
 			// If in the block's width
-			if (block.getY() - BLOCK_WIDTH < playerY && block.getY() + BLOCK_WIDTH > playerY
+			if (block instanceof BackgroundBlock) {
+				
+			}
+			else if (block.getY() - BLOCK_WIDTH < playerY && block.getY() + BLOCK_WIDTH > playerY
 					&& block.getX() - BLOCK_WIDTH < playerX && block.getX() + BLOCK_WIDTH > playerX) {
 				blocksCollided++;
 				// Update the position to right outside the block's width
